@@ -1,0 +1,100 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-ink-950 text-ink-100 font-sans antialiased;
+    background-image:
+      radial-gradient(1200px 600px at 15% -10%, rgba(240, 180, 41, 0.07), transparent 60%),
+      radial-gradient(900px 500px at 100% 0%, rgba(125, 211, 252, 0.05), transparent 55%);
+    background-attachment: fixed;
+  }
+
+  ::selection {
+    @apply bg-amber/30 text-white;
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #343446 transparent;
+  }
+
+  *::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    @apply bg-ink-700 rounded-full border-2 border-solid border-transparent bg-clip-content;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+}
+
+@layer components {
+  .panel {
+    @apply bg-ink-900/70 border border-ink-700/70 rounded-xl shadow-panel backdrop-blur-sm;
+  }
+
+  .label {
+    @apply block text-[11px] uppercase tracking-[0.14em] text-ink-400 mb-1.5 font-medium;
+  }
+
+  .input {
+    @apply w-full bg-ink-850 border border-ink-700 rounded-lg px-3 py-2 text-sm text-ink-100
+           placeholder:text-ink-500 outline-none transition
+           focus:border-amber/60 focus:ring-2 focus:ring-amber/15;
+  }
+
+  .textarea {
+    @apply input leading-relaxed resize-y min-h-[80px];
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-3.5 py-2 text-sm font-medium
+           transition select-none disabled:opacity-40 disabled:cursor-not-allowed;
+  }
+
+  .btn-primary {
+    @apply btn bg-amber text-ink-950 hover:bg-amber-soft active:scale-[0.98];
+  }
+
+  .btn-ghost {
+    @apply btn border border-ink-700 text-ink-200 hover:bg-ink-800 hover:border-ink-600 active:scale-[0.98];
+  }
+
+  .btn-quiet {
+    @apply btn text-ink-300 hover:text-ink-100 hover:bg-ink-800 active:scale-[0.98];
+  }
+
+  .btn-danger {
+    @apply btn border border-signal-bad/40 text-signal-bad hover:bg-signal-bad/10;
+  }
+
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-full border border-ink-700 bg-ink-850
+           px-2.5 py-1 text-[11px] text-ink-300;
+  }
+
+  .code {
+    @apply font-mono text-[12.5px] leading-relaxed whitespace-pre-wrap break-words
+           bg-ink-950 border border-ink-700 rounded-lg p-4 text-ink-200;
+  }
+
+  .section-title {
+    @apply font-display text-lg text-ink-100;
+  }
+}

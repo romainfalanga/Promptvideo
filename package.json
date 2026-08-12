@@ -1,0 +1,29 @@
+{
+  "name": "promptvideo-studio",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Atelier de creation de comptes video pilotes par Seedance 2.5 : artiste, direction artistique, personnages, lieux, references et prompts prets a copier-coller.",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "smoke": "esbuild scripts/smoke.ts --bundle --platform=node --format=esm --outfile=node_modules/.cache/smoke.mjs && node node_modules/.cache/smoke.mjs",
+    "sample": "esbuild scripts/sample.ts --bundle --platform=node --format=esm --outfile=node_modules/.cache/sample.mjs && node node_modules/.cache/sample.mjs"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5.7.2",
+    "vite": "^5.4.11"
+  }
+}
