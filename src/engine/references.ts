@@ -152,7 +152,7 @@ export function buildReferences(project: Project, previous: ReferenceSlot[] = []
     label: `${project.name} — planche de style`,
     subjectType: 'style',
     subjectId: null,
-    defines: 'la palette, le grain, le contraste et la qualite de lumiere de tout le compte',
+    defines: "la palette, le grain, le contraste et la qualite de lumiere de tout l'univers",
     exclude: 'le sujet, le cadrage et la composition de cette image',
     howTo: 'Generer avec un modele image, ou assembler un photogramme de reference et le retoucher a la bonne colorimetrie.',
     genPrompt: styleRefPrompt(project),
@@ -178,7 +178,7 @@ export function buildReferences(project: Project, previous: ReferenceSlot[] = []
         defines: `la composition du groupe, les silhouettes, les tenues et la maniere dont ils occupent l'espace`,
         exclude: "le decor, la pose et le cadrage de cette image",
         howTo:
-          'Plan de groupe en pied, tous visibles, fond neutre ou repérage reel. Chaque membre doit rester distinguable d\'un episode a l\'autre.',
+          'Plan de groupe en pied, tous visibles, fond neutre ou repérage reel. Chaque membre doit rester distinguable d\'une video a l\'autre.',
         genPrompt: join(
           [
             `Planche de reference de groupe, plusieurs personnes en pied, fond neutre`,

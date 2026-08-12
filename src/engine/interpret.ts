@@ -7,9 +7,8 @@
  * une direction artistique et un squelette editable.
  */
 
-import type { AspectRatio, Character, Place, Platform, Project } from '../types'
+import type { AspectRatio, Character, Place, Project } from '../types'
 import { UNIVERSES } from '../data/universes'
-import { PLATFORM_PRESETS } from '../data/library'
 import { SEEDANCE } from '../data/seedance'
 import { clamp, join, makeRng, randomSeed, titleCase, uid } from '../lib/utils'
 import { generateProject } from './generate'
@@ -66,7 +65,6 @@ const STOPWORDS = new Set([
 ])
 
 export interface Detected {
-  platform: Platform | null
   aspect: AspectRatio | null
   duration: number | null
   /** Noms propres reperes dans le texte (candidats personnages ou lieux). */
@@ -79,12 +77,6 @@ export interface Detected {
 export function detect(text: string): Detected {
   const raw = text.trim()
   const hay = normalize(raw)
-
-  let platform: Platform | null = null
-  if (/\btiktok\b/.test(hay)) platform = 'tiktok'
-  else if (/\breels?\b|\binstagram\b/.test(hay)) platform = 'reels'
-  else if (/\bshorts?\b/.test(hay)) platform = 'shorts'
-  else if (/\byoutube\b/.test(hay)) platform = 'youtube'
 
   let aspect: AspectRatio | null = null
   if (/\bvertical|9:16|9\/16\b/.test(hay)) aspect = '9:16'
@@ -121,7 +113,7 @@ export function detect(text: string): Detected {
   else if (/\bepique|grandiose|spectaculaire\b/.test(hay)) tone = 'ampleur maitrisee, jamais tape-a-l-oeil'
   else if (/\btriste|melancol|nostalg\b/.test(hay)) tone = 'melancolie retenue'
 
-  return { platform, aspect, duration, properNouns, keywords, tone }
+  return { aspect, duration, properNouns, keywords, tone }
 }
 
 /* ------------------------------------------------------------------ */
@@ -180,7 +172,6 @@ export type NounRole = 'ignore' | 'character' | 'place'
 
 export interface InterpretOptions {
   seed?: number
-  platform?: Platform
   /** Forcer un univers plutot que celui detecte. */
   universeId?: string
   /**
@@ -228,19 +219,16 @@ export function projectFromBrief(brief: string, opts: InterpretOptions = {}): In
   const scores = scoreUniverses(brief)
   const universeId = opts.universeId ?? (scores[0]?.score > 0 ? scores[0].universeId : rng.pick(UNIVERSES).id)
   const detected = detect(brief)
-  const platform = opts.platform ?? detected.platform ?? 'multi'
+  const project = generateProject({ seed, universeId, brief })
 
-  const project = generateProject({ seed, universeId, platform, brief })
-
-  // L'idee de l'utilisateur devient la colonne vertebrale du compte.
+  // L'idee de l'utilisateur devient la colonne vertebrale de l'univers.
   const clean = brief.trim()
   project.origin = 'sur-mesure'
   project.seedText = clean
   project.name = nameFromBrief(clean, project.name)
   project.artist.name = project.name
-  project.artist.handle = project.artist.handle
   project.artist.mission = clean
-  project.artist.bio = `${project.name} — ${clamp(clean, 150)}`
+  project.artist.tagline = clamp(clean, 110)
   project.direction.pitch = clean
   project.notes = `Idee d'origine (mot pour mot) :\n${clean}`
 
@@ -261,11 +249,10 @@ export function projectFromBrief(brief: string, opts: InterpretOptions = {}): In
 
   // Reglages deduits du texte.
   if (detected.aspect) project.settings.aspect = detected.aspect
-  else project.settings.aspect = PLATFORM_PRESETS[platform].aspect as AspectRatio
   if (detected.duration) project.settings.duration = detected.duration
 
   // Le pilote reprend l'idee telle quelle.
-  const pilot = project.episodes[0]
+  const pilot = project.videos[0]
   if (pilot) {
     pilot.logline = clean
     pilot.aspect = project.settings.aspect
@@ -286,12 +273,7 @@ export function projectFromBrief(brief: string, opts: InterpretOptions = {}): In
         if (i > 0) s.characterIds = [leadId]
       })
     }
-    pilot.title = `${clamp(clean, 60)} — episode 1`
-  }
-
-  // Mots-cles du brief injectes dans les hashtags.
-  if (pilot) {
-    pilot.hashtags = Array.from(new Set([...detected.keywords.slice(0, 4), ...pilot.hashtags])).slice(0, 8)
+    pilot.title = `${clamp(clean, 60)} — video 1`
   }
 
   project.refs = buildReferences(project)
@@ -309,7 +291,6 @@ export function explainInterpretation(result: InterpretResult): string[] {
     out.push("Aucun univers ne ressort du texte : direction artistique tiree au sort, a ajuster librement.")
   }
   const d = result.detected
-  if (d.platform) out.push(`Plateforme deduite : ${PLATFORM_PRESETS[d.platform].label}`)
   if (d.aspect) out.push(`Format deduit : ${d.aspect}`)
   if (d.duration) out.push(`Duree deduite : ${d.duration} s`)
   if (d.tone) out.push(`Ton detecte : ${d.tone}`)

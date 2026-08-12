@@ -9,7 +9,7 @@ const SECTION_TO_TAB: Record<string, string> = {
   Casting: 'casting',
   Lieux: 'lieux',
   Formats: 'formats',
-  Episodes: 'episodes',
+  Videos: 'videos',
   References: 'references',
   Reglages: 'reglages',
 }
@@ -32,8 +32,8 @@ export default function AuditTab({ project, onGoTo }: { project: Project; onGoTo
   return (
     <div className="space-y-4">
       <Card
-        title="Audit du compte"
-        subtitle="Deux familles de controles : la solidite editoriale du compte, et la conformite technique aux contraintes reelles de Seedance 2.5."
+        title="Audit de l'univers"
+        subtitle="Deux familles de controles : la solidite editoriale de l'univers, et la conformite technique aux contraintes reelles de Seedance 2.5."
       >
         <div className="grid gap-5 lg:grid-cols-[220px_1fr]">
           <div className="rounded-xl border border-ink-700/70 bg-ink-850/40 p-5 text-center">
@@ -85,7 +85,7 @@ export default function AuditTab({ project, onGoTo }: { project: Project; onGoTo
       {audit.issues.length === 0 ? (
         <Card title="Rien a corriger">
           <p className="text-[13px] text-ink-300">
-            Le compte est complet et conforme aux contraintes du modele. Direction l&apos;onglet Export.
+            L'univers est complet et conforme aux contraintes du modele. Direction l&apos;onglet Export.
           </p>
         </Card>
       ) : (

@@ -1,7 +1,7 @@
-import type { AspectRatio, Platform, Project, Resolution } from '../../types'
+import type { AspectRatio, Project, Resolution } from '../../types'
 import { updateProject } from '../../store'
 import { ASPECTS, AUDIO_LEGEND, BASE_NEGATIVES, PROMPT_RULES, RESOLUTIONS, SEEDANCE } from '../../data/seedance'
-import { PLATFORM_PRESETS } from '../../data/library'
+import { OUTPUT_PRESETS } from '../../data/library'
 import { Area, Card, Field, Grid, ListEditor, NumberField, Select, Toggle } from '../../components/ui'
 
 export default function SettingsTab({ project }: { project: Project }) {
@@ -11,9 +11,9 @@ export default function SettingsTab({ project }: { project: Project }) {
       d.settings[key] = value
     })
 
-  const applyToAllEpisodes = () =>
+  const applyToAllVideos = () =>
     updateProject(project.id, (d) => {
-      d.episodes.forEach((e) => {
+      d.videos.forEach((e) => {
         e.aspect = d.settings.aspect
         e.resolution = d.settings.resolution
         e.cameraFixed = d.settings.cameraFixed
@@ -25,26 +25,34 @@ export default function SettingsTab({ project }: { project: Project }) {
       <Grid cols={2}>
         <Card
           title="Rendu par defaut"
-          subtitle="Valeurs appliquees aux nouveaux episodes."
+          subtitle="Valeurs appliquees aux nouveaux videos."
           actions={
-            <button type="button" className="btn-ghost px-3 py-1.5 text-[12px]" onClick={applyToAllEpisodes}>
-              Appliquer a tous les episodes
+            <button type="button" className="btn-ghost px-3 py-1.5 text-[12px]" onClick={applyToAllVideos}>
+              Appliquer a tous les videos
             </button>
           }
         >
           <div className="space-y-4">
-            <Select
-              label="Plateforme"
-              value={project.platform}
-              onChange={(v: Platform) =>
-                updateProject(project.id, (d) => {
-                  d.platform = v
-                  d.settings.aspect = PLATFORM_PRESETS[v].aspect as AspectRatio
-                  d.settings.duration = PLATFORM_PRESETS[v].duration
-                })
-              }
-              options={(Object.keys(PLATFORM_PRESETS) as Platform[]).map((k) => ({ value: k, label: PLATFORM_PRESETS[k].label }))}
-            />
+            <div>
+              <span className="label">Preset de sortie</span>
+              <div className="flex flex-wrap gap-1.5">
+                {OUTPUT_PRESETS.map((o) => (
+                  <button
+                    key={o.id}
+                    type="button"
+                    className="chip hover:border-ink-500 hover:text-ink-200"
+                    onClick={() =>
+                      updateProject(project.id, (d) => {
+                        d.settings.aspect = o.aspect as AspectRatio
+                        d.settings.duration = o.duration
+                      })
+                    }
+                  >
+                    {o.label}
+                  </button>
+                ))}
+              </div>
+            </div>
             <Grid cols={2}>
               <NumberField
                 label="Duree"
@@ -71,7 +79,7 @@ export default function SettingsTab({ project }: { project: Project }) {
               label="Camera verrouillee par defaut"
               checked={s.cameraFixed}
               onChange={(v) => set('cameraFixed', v)}
-              hint="Utile pour les comptes en plans fixes."
+              hint="Utile pour les univers en plans fixes."
             />
           </div>
         </Card>

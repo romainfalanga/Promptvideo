@@ -9,20 +9,20 @@ import DirectionTab from './tabs/DirectionTab'
 import CastTab from './tabs/CastTab'
 import PlacesTab from './tabs/PlacesTab'
 import FormatsTab from './tabs/FormatsTab'
-import EpisodesTab from './tabs/EpisodesTab'
+import VideosTab from './tabs/VideosTab'
 import ReferencesTab from './tabs/ReferencesTab'
 import SettingsTab from './tabs/SettingsTab'
 import AuditTab from './tabs/AuditTab'
 import ExportTab from './tabs/ExportTab'
 
 const TABS = [
-  { id: 'artiste', label: 'Artiste', step: 2 },
+  { id: 'artiste', label: 'Identité', step: 2 },
   { id: 'direction', label: 'Direction artistique', step: 2 },
   { id: 'casting', label: 'Casting', step: 2 },
   { id: 'lieux', label: 'Lieux', step: 2 },
   { id: 'formats', label: 'Formats', step: 2 },
   { id: 'references', label: 'References', step: 3 },
-  { id: 'episodes', label: 'Episodes', step: 4 },
+  { id: 'videos', label: 'Vidéos', step: 4 },
   { id: 'reglages', label: 'Reglages', step: 4 },
   { id: 'audit', label: 'Audit', step: 5 },
   { id: 'export', label: 'Export', step: 5 },
@@ -49,14 +49,12 @@ export default function Workspace({ project }: { project: Project }) {
             <span className="chip font-mono">graine {project.seedNumber}</span>
           </div>
           <h1 className="font-display text-3xl leading-tight text-ink-100">{project.name}</h1>
-          <p className="text-[13px] text-ink-400">
-            @{project.artist.handle} — {project.artist.tagline || project.direction.pitch}
-          </p>
+          <p className="text-[13px] text-ink-400">{project.artist.tagline || project.direction.pitch}</p>
         </div>
 
         <div className="w-full max-w-xs">
           <div className="mb-1.5 flex items-center justify-between text-[12px]">
-            <span className="text-ink-400">Completude du compte</span>
+            <span className="text-ink-400">Complétude de l'univers</span>
             <span className={pct >= 85 ? 'text-signal-ok' : pct >= 60 ? 'text-signal-warn' : 'text-signal-bad'}>
               {pct} %
             </span>
@@ -98,7 +96,7 @@ export default function Workspace({ project }: { project: Project }) {
         {tab === 'lieux' && <PlacesTab project={project} />}
         {tab === 'formats' && <FormatsTab project={project} />}
         {tab === 'references' && <ReferencesTab project={project} />}
-        {tab === 'episodes' && <EpisodesTab project={project} />}
+        {tab === 'videos' && <VideosTab project={project} />}
         {tab === 'reglages' && <SettingsTab project={project} />}
         {tab === 'audit' && <AuditTab project={project} onGoTo={(s) => setTab(s as TabId)} />}
         {tab === 'export' && <ExportTab project={project} />}

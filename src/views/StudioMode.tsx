@@ -1,18 +1,13 @@
 import { useState } from 'react'
-import type { ConceptCard, Platform } from '../types'
+import type { ConceptCard } from '../types'
 import { generateConceptBatch, generateProject } from '../engine/generate'
 import { UNIVERSES, getUniverse } from '../data/universes'
-import { PLATFORM_PRESETS } from '../data/library'
 import { addProject } from '../store'
 import { Area, Card, Select, Swatches } from '../components/ui'
 import { cx } from '../lib/utils'
 
-const PLATFORM_OPTIONS: { value: Platform; label: string }[] = (
-  Object.keys(PLATFORM_PRESETS) as Platform[]
-).map((k) => ({ value: k, label: PLATFORM_PRESETS[k].label }))
 
 export default function StudioMode() {
-  const [platform, setPlatform] = useState<Platform>('multi')
   const [universeId, setUniverseId] = useState<string>('')
   const [brief, setBrief] = useState('')
   const [cards, setCards] = useState<ConceptCard[]>([])
@@ -22,7 +17,6 @@ export default function StudioMode() {
     const seed = seedInput.trim() ? Number(seedInput.trim()) : undefined
     setCards(
       generateConceptBatch(3, {
-        platform,
         universeId: universeId || undefined,
         brief: brief.trim() || undefined,
         seed: Number.isFinite(seed) ? seed : undefined,
@@ -34,7 +28,6 @@ export default function StudioMode() {
     const project = generateProject({
       seed: card.seedNumber,
       universeId: card.universeId,
-      platform,
       brief: brief.trim() || undefined,
     })
     addProject(project)
@@ -43,22 +36,16 @@ export default function StudioMode() {
   return (
     <div className="space-y-6">
       <header className="max-w-3xl">
-        <h1 className="font-display text-3xl text-ink-100">Mode Studio</h1>
+        <h1 className="font-display text-3xl text-ink-100">Idées d&apos;univers</h1>
         <p className="mt-2 text-[13.5px] leading-relaxed text-ink-400">
-          Le moteur propose des comptes entiers, pas des mots-cles. Chaque proposition contient un artiste,
-          une direction artistique tenue, un casting, des lieux et un format recurrent. Tu peux tout laisser
-          libre, ou poser des contraintes ci-dessous. Une graine identique redonne exactement le meme resultat.
+          Le moteur propose des univers entiers, pas des mots-clés. Chaque proposition contient une direction
+          artistique tenue, un casting, des lieux et un format récurrent — de quoi produire des vidéos qui se
+          ressemblent. Une graine identique redonne exactement le même résultat.
         </p>
       </header>
 
       <Card title="Contraintes de depart" subtitle="Tout est facultatif. Laisse vide pour laisser le moteur decider.">
-        <div className="grid gap-4 md:grid-cols-3">
-          <Select
-            label="Plateforme visee"
-            value={platform}
-            onChange={setPlatform}
-            options={PLATFORM_OPTIONS}
-          />
+        <div className="grid gap-4 md:grid-cols-2">
           <Select
             label="Univers impose"
             value={universeId}
@@ -76,7 +63,7 @@ export default function StudioMode() {
               value={seedInput}
               onChange={(e) => setSeedInput(e.target.value)}
             />
-            <span className="mt-1 block text-[11px] text-ink-500">Meme graine = meme compte, a l&apos;identique.</span>
+            <span className="mt-1 block text-[11px] text-ink-500">Meme graine = meme univers, a l&apos;identique.</span>
           </label>
         </div>
 
@@ -87,13 +74,13 @@ export default function StudioMode() {
             onChange={setBrief}
             rows={2}
             placeholder="ex. pas de visage humain · sans dialogue · doit tenir en 10 secondes"
-            hint="Ce texte est conserve dans les notes du compte genere."
+            hint="Ce texte est conserve dans les notes de l&apos;univers genere."
           />
         </div>
 
         <div className="mt-4 flex items-center gap-3">
           <button type="button" className="btn-primary" onClick={run}>
-            {cards.length ? 'Regenerer trois propositions' : 'Generer trois propositions'}
+            {cards.length ? 'Regénérer trois univers' : 'Générer trois univers'}
           </button>
           {cards.length > 0 && (
             <button type="button" className="btn-quiet" onClick={() => setCards([])}>
@@ -153,15 +140,13 @@ function ConceptView({ card, onKeep }: { card: ConceptCard; onKeep: () => void }
             {u.emoji} {u.name}
           </span>
           <h3 className="font-display text-xl leading-tight text-ink-100">{card.name}</h3>
-          <p className="text-[12px] text-ink-500">@{card.handle}</p>
-        </div>
+                  </div>
       </div>
 
       <p className="text-[13px] leading-relaxed text-amber-soft">{card.tagline}</p>
 
       <Line label="Mission" value={card.pitch} />
       <Line label="Look" value={card.visual} />
-      <Line label="Audience" value={card.audience} />
 
       <div>
         <span className="label">Palette — {card.palette.name}</span>
@@ -197,7 +182,7 @@ function ConceptView({ card, onKeep }: { card: ConceptCard; onKeep: () => void }
       <div className="mt-auto flex items-center justify-between gap-2 pt-2">
         <span className="font-mono text-[10.5px] text-ink-600">graine {card.seedNumber}</span>
         <button type="button" className="btn-primary px-3 py-1.5 text-[13px]" onClick={onKeep}>
-          Developper ce compte
+          Développer cet univers
         </button>
       </div>
     </article>

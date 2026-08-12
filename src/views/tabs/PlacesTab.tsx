@@ -106,7 +106,7 @@ export default function PlacesTab({ project }: { project: Project }) {
             onDelete={() => {
               updateProject(project.id, (d) => {
                 d.places = d.places.filter((x) => x.id !== p.id)
-                d.episodes.forEach((e) => e.shots.forEach((s) => { if (s.placeId === p.id) s.placeId = null }))
+                d.videos.forEach((e) => e.shots.forEach((s) => { if (s.placeId === p.id) s.placeId = null }))
               })
               rebuildRefs(project.id)
               setOpenId(null)
@@ -222,7 +222,7 @@ function PropsCard({ project }: { project: Project }) {
   return (
     <Card
       title="Accessoires recurrents"
-      subtitle="Un objet qui revient d'episode en episode vaut une signature visuelle."
+      subtitle="Un objet qui revient d'video en video vaut une signature visuelle."
       actions={
         <>
           <button type="button" className="btn-ghost px-3 py-1.5 text-[12px]" onClick={addFromLibrary}>
@@ -284,7 +284,7 @@ function PropsCard({ project }: { project: Project }) {
                     onConfirm={() => {
                       updateProject(project.id, (d) => {
                         d.props = d.props.filter((x) => x.id !== p.id)
-                        d.episodes.forEach((e) => e.shots.forEach((s) => (s.propIds = s.propIds.filter((i) => i !== p.id))))
+                        d.videos.forEach((e) => e.shots.forEach((s) => (s.propIds = s.propIds.filter((i) => i !== p.id))))
                       })
                       rebuildRefs(project.id)
                     }}

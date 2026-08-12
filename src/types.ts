@@ -2,13 +2,11 @@
  * Modele de donnees de Promptvideo Studio.
  *
  * Un "Compte" (Project) est l'unite de travail : un artiste, sa direction
- * artistique, son casting, ses lieux, ses formats recurrents, ses episodes
+ * artistique, son casting, ses lieux, ses formats recurrents, ses videos
  * et le manifeste de references a envoyer a Seedance 2.5.
  */
 
 export type ID = string
-
-export type Platform = 'tiktok' | 'reels' | 'shorts' | 'youtube' | 'multi'
 
 export type RefKind = 'image' | 'video' | 'audio'
 
@@ -22,34 +20,31 @@ export type Resolution = '480p' | '720p' | '1080p' | '4K'
 /* Artiste                                                             */
 /* ------------------------------------------------------------------ */
 
+/**
+ * Identite de l'univers : qui filme, et pourquoi.
+ *
+ * Ces champs ne partent pas tels quels dans le prompt — sauf les interdits.
+ * Ils servent a ecrire : ils fixent l'intention a laquelle chaque video doit
+ * repondre, et alimentent le brief a deleguer.
+ */
 export interface Artist {
-  /** Nom public du compte / de l'artiste. */
+  /** Nom de l'univers ou de l'artiste. */
   name: string
-  /** Identifiant social, sans @. */
-  handle: string
-  /** Une phrase qui vend le compte. */
+  /** Une phrase qui resume ce qu'on fabrique ici. */
   tagline: string
-  /** Archetype createur (le "qui parle"). */
+  /** Qui tient la camera, du point de vue de la fiction. */
   archetype: string
-  /** Pourquoi ce compte existe. */
+  /** L'intention : ce que ces videos cherchent a faire. */
   mission: string
-  /** Biographie publique, prete a coller dans une bio de plateforme. */
-  bio: string
-  /** Mythologie interne : d'ou vient l'artiste, ce qu'il cherche. */
+  /** Mythologie interne : le monde dans lequel les videos se deroulent. */
   lore: string
-  /** Ton de voix, vocabulaire, rythme de parole. */
+  /** Ton et vocabulaire, quand il y a du texte ou de la voix. */
   voice: string
-  /** A qui ca s'adresse. */
-  audience: string
-  /** La promesse tenue a chaque video. */
-  promise: string
-  /** Phrase signature repetee (outro, hook, mantra). */
+  /** Phrase signature, si l'univers en a une. */
   signature: string
-  /** Rythme de publication vise. */
-  cadence: string
-  /** Valeurs / obsessions. */
+  /** Valeurs / obsessions qui guident l'ecriture. */
   values: string[]
-  /** Ce que le compte ne fera jamais. */
+  /** Ce que ces videos ne feront jamais. Reprises dans le bloc negatif. */
   taboos: string[]
 }
 
@@ -121,7 +116,7 @@ export interface ArtDirection {
   transitionTriggers: string[]
   /** Reservoir de lieux a faire tourner pour ne pas se repeter. */
   environmentPool: string[]
-  /** Ce qui doit rester identique d'un episode a l'autre. */
+  /** Ce qui doit rester identique d'une video a l'autre. */
   continuityRules: string[]
 }
 
@@ -207,12 +202,11 @@ export interface Format {
   beats: string[]
   hook: string
   payoff: string
-  cta: string
   recurring: string[]
 }
 
 /* ------------------------------------------------------------------ */
-/* Episodes et plans                                                   */
+/* Videos et plans                                                   */
 /* ------------------------------------------------------------------ */
 
 export type ShotSize =
@@ -234,7 +228,7 @@ export interface ShotAudio {
 export interface Shot {
   id: ID
   label: string
-  /** Bornes temporelles en secondes dans l'episode. */
+  /** Bornes temporelles en secondes dans la video. */
   start: number
   end: number
   shotSize: ShotSize
@@ -263,7 +257,7 @@ export interface Shot {
   notes: string
 }
 
-export interface Episode {
+export interface Video {
   id: ID
   title: string
   formatId: ID | null
@@ -273,9 +267,9 @@ export interface Episode {
    * c'est la matiere premiere du scenario, pas une metadonnee.
    */
   lyrics: string
-  /** L'idee visuelle forte ou la metaphore que cet episode cherche. */
+  /** L'idee visuelle forte ou la metaphore que cette video cherche. */
   visualIdea: string
-  /** Ce qui doit rester identique a l'episode precedent (tenue, lieu, heure...). */
+  /** Ce qui doit rester identique a la video precedent (tenue, lieu, heure...). */
   continuity: string
   duration: number
   aspect: AspectRatio
@@ -283,8 +277,6 @@ export interface Episode {
   cameraFixed: boolean
   seed: string
   shots: Shot[]
-  caption: string
-  hashtags: string[]
   status: 'idee' | 'ecrit' | 'pret' | 'genere'
 }
 
@@ -348,29 +340,26 @@ export interface Project {
   /** Graine numerique du generateur, pour rejouer une generation. */
   seedNumber: number
   universeId: string
-  platform: Platform
   artist: Artist
   direction: ArtDirection
   characters: Character[]
   places: Place[]
   props: Prop[]
   formats: Format[]
-  episodes: Episode[]
+  videos: Video[]
   refs: ReferenceSlot[]
   settings: RenderSettings
   notes: string
 }
 
-/** Fiche courte presentee dans le mode Studio avant materialisation. */
+/** Fiche courte d'une idee d'univers, presentee avant de la developper. */
 export interface ConceptCard {
   seedNumber: number
   universeId: string
   name: string
-  handle: string
   tagline: string
   pitch: string
   visual: string
-  audience: string
   formatName: string
   formatPitch: string
   palette: Palette

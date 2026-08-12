@@ -7,7 +7,7 @@
  * apportent ET ce qu'il faut y ignorer.
  */
 
-import type { Episode, Project, Shot } from '../types'
+import type { Video, Project, Shot } from '../types'
 import { AUDIO_SYNTAX, countWords, formatTimecode } from '../data/seedance'
 import { join, lcFirst, sentence, ucFirst } from '../lib/utils'
 import { indexReferences, type IndexedRef } from './references'
@@ -48,7 +48,7 @@ function collectRefs(project: Project, shots: Shot[]): IndexedRef[] {
   )
 
   // Renumerotation indispensable : Seedance numerote par ordre d'envoi.
-  // Si l'episode n'utilise que 7 references sur 17, la cinquieme jointe est
+  // Si la video n'utilise que 7 references sur 17, la cinquieme jointe est
   // @Image5 — pas le numero qu'elle occupe dans le manifeste complet.
   return indexReferences(kept)
 }
@@ -114,7 +114,10 @@ function shotLine(project: Project, shot: Shot, withTimecode: boolean, placesSee
     else placeClause = placeIsSubject ? '' : `dans ${place.name}`
   }
 
-  const head = join([subject, shot.action || 'action a preciser', placeClause], ', ')
+  // L'action est saisie librement : un point final la couperait de son
+  // complement de lieu (« ...derriere un pilier., dans Le parking »).
+  const action = (shot.action || 'action a preciser').trim().replace(/[.;]+$/, '')
+  const head = join([subject, action, placeClause], ', ')
 
   // Les complements sont introduits par un deux-points : ils gardent leur
   // majuscule d'origine sans casser la phrase.
@@ -188,13 +191,13 @@ function styleFooter(project: Project, shots: Shot[]): string {
   return lines.filter(Boolean).join('\n')
 }
 
-function constraintsFooter(project: Project, episode: Episode): string {
+function constraintsFooter(project: Project, video: Video): string {
   const d = project.direction
   const negatives = project.settings.negatives.filter(Boolean)
   const lines = [
-    `Parametres : duree ${episode.duration} s, format ${episode.aspect}, resolution ${episode.resolution}${
-      episode.cameraFixed ? ', camera verrouillee' : ''
-    }${episode.seed ? `, seed ${episode.seed}` : ''}.`,
+    `Parametres : duree ${video.duration} s, format ${video.aspect}, resolution ${video.resolution}${
+      video.cameraFixed ? ', camera verrouillee' : ''
+    }${video.seed ? `, seed ${video.seed}` : ''}.`,
     d.avoidedTimes.length ? `Moments ecartes : ${d.avoidedTimes.join(' ; ')}.` : '',
     negatives.length ? `A eviter absolument : ${negatives.join(' ; ')}.` : '',
     d.motto ? `Regle d'or : ${d.motto}` : '',
@@ -204,21 +207,21 @@ function constraintsFooter(project: Project, episode: Episode): string {
 
 /**
  * Bloc de continuite. Il n'a de sens que sur un compte qui raconte la meme
- * histoire d'un episode a l'autre : on rappelle alors ce qui doit rester
+ * histoire d'une video a l'autre : on rappelle alors ce qui doit rester
  * rigoureusement identique.
  */
-function continuityBlock(project: Project, episode: Episode): string {
+function continuityBlock(project: Project, video: Video): string {
   const rules = project.direction.continuityRules.filter(Boolean)
   const lines = [
-    rules.length ? `Continuite obligatoire d'un episode a l'autre : ${rules.join(' ; ')}.` : '',
-    episode.continuity ? `Continuite propre a cet episode : ${episode.continuity}` : '',
+    rules.length ? `Continuite obligatoire d'une video a l'autre : ${rules.join(' ; ')}.` : '',
+    video.continuity ? `Continuite propre a cette video : ${video.continuity}` : '',
   ]
   return lines.filter(Boolean).join('\n')
 }
 
-/** Compile un episode entier en un seul prompt multi-plans timecode. */
-export function compileEpisode(project: Project, episode: Episode): CompiledPrompt {
-  const shots = episode.shots
+/** Compile une video entier en un seul prompt multi-plans timecode. */
+export function compileVideo(project: Project, video: Video): CompiledPrompt {
+  const shots = video.shots
   const attachments = collectRefs(project, shots)
 
   const header = attachments.length
@@ -245,8 +248,8 @@ export function compileEpisode(project: Project, episode: Episode): CompiledProm
   // L'idee visuelle passe avant la logline : c'est elle qui doit orienter
   // la generation, pas le resume du format.
   const narrative = [
-    episode.visualIdea ? sentence(episode.visualIdea) : '',
-    episode.logline ? sentence(episode.logline) : '',
+    video.visualIdea ? sentence(video.visualIdea) : '',
+    video.logline ? sentence(video.logline) : '',
     ...shotLines,
   ]
     .filter(Boolean)
@@ -256,8 +259,8 @@ export function compileEpisode(project: Project, episode: Episode): CompiledProm
   const footer = [
     styleFooter(project, shots),
     audioLine(project, shots),
-    continuityBlock(project, episode),
-    constraintsFooter(project, episode),
+    continuityBlock(project, video),
+    constraintsFooter(project, video),
   ]
     .filter(Boolean)
     .join('\n')
@@ -276,7 +279,7 @@ export function compileEpisode(project: Project, episode: Episode): CompiledProm
 }
 
 /** Compile un plan isole : utile pour les clips courts de 4 a 10 secondes. */
-export function compileShot(project: Project, episode: Episode, shot: Shot): CompiledPrompt {
+export function compileShot(project: Project, video: Video, shot: Shot): CompiledPrompt {
   const attachments = collectRefs(project, [shot])
   const declarations = attachments.map(refDeclaration).join(' ')
   const anchors = anchorsOf(project, [shot])
@@ -295,9 +298,9 @@ export function compileShot(project: Project, episode: Episode, shot: Shot): Com
   const footer = [
     styleFooter(project, [shot]),
     audioLine(project, [shot]),
-    continuityBlock(project, episode),
-    `Parametres : duree ${duration} s, format ${episode.aspect}, resolution ${episode.resolution}${
-      episode.cameraFixed ? ', camera verrouillee' : ''
+    continuityBlock(project, video),
+    `Parametres : duree ${duration} s, format ${video.aspect}, resolution ${video.resolution}${
+      video.cameraFixed ? ', camera verrouillee' : ''
     }.`,
     project.settings.negatives.length ? `A eviter : ${project.settings.negatives.join(' ; ')}.` : '',
   ]

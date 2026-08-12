@@ -27,7 +27,7 @@ export default function ReferencesTab({ project }: { project: Project }) {
     <div className="space-y-4">
       <Card
         title="Manifeste de references"
-        subtitle="Seedance identifie les references par leur ORDRE d'envoi : le premier fichier joint devient @Image1. Les tokens affiches ici valent si tu envoies tout le manifeste ; chaque episode recalcule les siens selon les references qu'il utilise reellement, et sa propre liste est livree avec son prompt."
+        subtitle="Seedance identifie les references par leur ORDRE d'envoi : le premier fichier joint devient @Image1. Les tokens affiches ici valent si tu envoies tout le manifeste ; chaque video recalcule les siens selon les references qu'il utilise reellement, et sa propre liste est livree avec son prompt."
         actions={
           <>
             <CopyButton text={exportReferenceManifest(project)} label="Copier le manifeste" />

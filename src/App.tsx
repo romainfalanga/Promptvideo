@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react'
 import { openProject, useActiveProject, useStore } from './store'
 import Home from './views/Home'
+import QuickPrompt from './views/QuickPrompt'
 import StudioMode from './views/StudioMode'
 import CustomMode from './views/CustomMode'
 import Workspace from './views/Workspace'
 import { cx } from './lib/utils'
 
-export type Route = 'accueil' | 'studio' | 'sur-mesure' | 'atelier'
+export type Route = 'accueil' | 'nouvelle-video' | 'studio' | 'sur-mesure' | 'atelier'
 
 export default function App() {
   const store = useStore()
@@ -38,27 +39,30 @@ export default function App() {
                 Promptvideo Studio
               </span>
               <span className="block text-[10.5px] uppercase tracking-[0.16em] text-ink-500">
-                Comptes Seedance 2.5
+                Prompts Seedance 2.5
               </span>
             </span>
           </button>
 
           <nav className="ml-2 flex items-center gap-1">
+            <NavLink active={route === 'nouvelle-video'} onClick={() => go('nouvelle-video')}>
+              Nouvelle vidéo
+            </NavLink>
             <NavLink active={route === 'accueil'} onClick={() => go('accueil')}>
-              Mes comptes{store.projects.length > 0 && ` (${store.projects.length})`}
+              Mes univers{store.projects.length > 0 && ` (${store.projects.length})`}
             </NavLink>
             <NavLink active={route === 'studio'} onClick={() => go('studio')}>
-              Mode Studio
+              Idées d'univers
             </NavLink>
             <NavLink active={route === 'sur-mesure'} onClick={() => go('sur-mesure')}>
-              Mode Sur-Mesure
+              Créer un univers
             </NavLink>
           </nav>
 
           {active && (
             <div className="ml-auto flex items-center gap-3">
               <span className="hidden text-[12px] text-ink-400 sm:block">
-                Compte ouvert : <span className="text-ink-200">{active.name}</span>
+                Univers ouvert : <span className="text-ink-200">{active.name}</span>
               </span>
               <button type="button" className="btn-ghost px-3 py-1.5 text-[13px]" onClick={() => go('accueil')}>
                 Fermer
@@ -69,7 +73,14 @@ export default function App() {
       </header>
 
       <main className="mx-auto w-full max-w-[1400px] flex-1 px-5 py-7">
-        {route === 'accueil' && <Home onStudio={() => go('studio')} onCustom={() => go('sur-mesure')} />}
+        {route === 'accueil' && (
+          <Home
+            onStudio={() => go('studio')}
+            onCustom={() => go('sur-mesure')}
+            onQuick={() => go('nouvelle-video')}
+          />
+        )}
+        {route === 'nouvelle-video' && <QuickPrompt />}
         {route === 'studio' && <StudioMode />}
         {route === 'sur-mesure' && <CustomMode />}
         {route === 'atelier' && active && <Workspace project={active} />}
@@ -78,7 +89,7 @@ export default function App() {
       <footer className="border-t border-ink-800/70 px-5 py-4">
         <div className="mx-auto flex max-w-[1400px] flex-wrap items-center justify-between gap-3 text-[11.5px] text-ink-500">
           <span>
-            Tout est stocke dans ce navigateur. Exporte tes comptes en JSON pour les conserver.
+            Tout est stocké dans ce navigateur. Exporte tes univers en JSON pour les conserver.
           </span>
           <span>
             Contraintes appliquees : 4–30 s · 30 images / 10 videos / 10 audio · references numerotees par ordre d&apos;envoi

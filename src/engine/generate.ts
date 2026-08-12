@@ -3,7 +3,7 @@
  *
  * Il ne tire pas des mots au hasard : il choisit un univers coherent puis
  * assemble ses briques avec une graine reproductible. Une meme graine
- * redonne exactement le meme compte, ce qui permet de rejouer, comparer
+ * redonne exactement le meme univers, ce qui permet de rejouer, comparer
  * et affiner une idee.
  */
 
@@ -12,17 +12,15 @@ import type {
   Artist,
   Character,
   ConceptCard,
-  Episode,
+  Video,
   Format,
   Place,
-  Platform,
   Project,
   Prop,
   Shot,
 } from '../types'
 import type { CharacterSeed, PlaceSeed, PropSeed, FormatSeed, Universe } from '../data/library'
 import {
-  CADENCES,
   COMPOSITIONS,
   DEFAULT_BACKGROUND_LIFE,
   DEFAULT_CROWD_RULES,
@@ -30,18 +28,17 @@ import {
   DEFAULT_LIVING_ELEMENTS,
   DEFAULT_TRANSITION_TRIGGERS,
   HOOK_SHAPES,
-  PLATFORM_PRESETS,
+  OUTPUT_PRESETS,
   RHYTHMS,
 } from '../data/library'
 import { UNIVERSES, getUniverse } from '../data/universes'
 import { BASE_NEGATIVES, CAMERA_MOVES, SEEDANCE } from '../data/seedance'
-import { handleize, join, makeRng, randomSeed, uid, type Rng } from '../lib/utils'
+import { join, makeRng, randomSeed, uid, type Rng } from '../lib/utils'
 import { buildReferences } from './references'
 
 export interface GenerateOptions {
   seed?: number
   universeId?: string
-  platform?: Platform
   /** Contraintes libres saisies par l'utilisateur, injectees dans les notes. */
   brief?: string
   /** Univers a eviter (deja utilises). */
@@ -67,27 +64,19 @@ function makeAccountName(rng: Rng, u: Universe): string {
 function buildArtist(rng: Rng, u: Universe, name: string): Artist {
   const archetype = rng.pick(u.archetypes)
   const mission = rng.pick(u.missions)
-  const promise = rng.pick(u.promises)
   const voice = rng.pick(u.voices)
-  const audience = rng.pick(u.audiences)
   const signature = rng.pick(u.signatures)
   const values = rng.sample(u.values, Math.min(3, u.values.length))
   const taboos = rng.sample(u.taboos, Math.min(2, u.taboos.length))
-  const cadence = rng.pick(CADENCES)
 
   return {
     name,
-    handle: handleize(name),
-    tagline: `${u.pitch.split(':')[0].trim()} — ${promise}`,
+    tagline: u.pitch.split(':')[0].trim(),
     archetype,
     mission,
-    bio: `${name} — ${archetype}. ${promise[0].toUpperCase()}${promise.slice(1)}. ${signature}`,
-    lore: `Le compte est tenu par ${archetype === 'aucun' ? 'une presence anonyme' : `un·e ${archetype}`} dont on ne sait presque rien. ${mission[0].toUpperCase()}${mission.slice(1)}. Le decor et les personnages reviennent d'un episode a l'autre : c'est la meme histoire qui avance, pas une serie de videos independantes.`,
+    lore: `Les videos sont filmees par ${archetype === 'aucun' ? 'une presence anonyme' : `un·e ${archetype}`}. ${mission[0].toUpperCase()}${mission.slice(1)}. Le decor et les personnages reviennent d'une video a l'autre : c'est le meme monde qui se poursuit, pas une serie d'images sans lien.`,
     voice,
-    audience,
-    promise,
     signature,
-    cadence,
     values,
     taboos,
   }
@@ -205,13 +194,12 @@ function toFormat(seed: FormatSeed, duration: number): Format {
     beats: [...seed.beats],
     hook: seed.hook,
     payoff: seed.payoff,
-    cta: seed.cta,
     recurring: [...seed.recurring],
   }
 }
 
 /* ------------------------------------------------------------------ */
-/* Episode pilote                                                      */
+/* Video pilote                                                      */
 /* ------------------------------------------------------------------ */
 
 const MOVES_BY_POSITION = [
@@ -223,14 +211,13 @@ const MOVES_BY_POSITION = [
 
 function buildPilot(
   rng: Rng,
-  u: Universe,
   format: Format,
   characters: Character[],
   places: Place[],
   props: Prop[],
   direction: ArtDirection,
   aspect: Project['settings']['aspect'],
-): Episode {
+): Video {
   const beats = format.beats.length ? format.beats : ['Ouverture', 'Developpement', 'Chute']
   const n = beats.length
   const duration = format.duration
@@ -280,7 +267,7 @@ function buildPilot(
 
   return {
     id: uid('ep'),
-    title: `${format.name} — episode 1`,
+    title: `${format.name} — video 1`,
     formatId: format.id,
     logline: `${format.pitch} ${rng.pick(HOOK_SHAPES)}`,
     lyrics: '',
@@ -292,8 +279,6 @@ function buildPilot(
     cameraFixed: direction.cameraGrammar.includes('fixe'),
     seed: '',
     shots,
-    caption: `${format.pitch}\n\n${format.cta}`,
-    hashtags: [u.id.replace(/-/g, ''), 'seedance', 'aivideo', ...u.keywords.slice(0, 3).map((k) => k.replace(/\s+/g, ''))],
     status: 'ecrit',
   }
 }
@@ -318,11 +303,9 @@ export function generateConcept(opts: GenerateOptions = {}): ConceptCard {
     seedNumber: seed,
     universeId: u.id,
     name,
-    handle: artist.handle,
-    tagline: artist.promise,
+    tagline: artist.tagline,
     pitch: artist.mission,
     visual: join([direction.genre, direction.lighting, direction.texture], ' · '),
-    audience: artist.audience,
     formatName: format.name,
     formatPitch: format.pitch,
     palette: direction.palette,
@@ -337,8 +320,7 @@ export function generateProject(opts: GenerateOptions = {}): Project {
   const seed = opts.seed ?? randomSeed()
   const rng = makeRng(seed)
   const u = pickUniverse(rng, opts)
-  const platform = opts.platform ?? 'multi'
-  const preset = PLATFORM_PRESETS[platform]
+  const preset = OUTPUT_PRESETS[0]
   const name = makeAccountName(rng, u)
 
   const artist = buildArtist(rng, u, name)
@@ -354,11 +336,11 @@ export function generateProject(opts: GenerateOptions = {}): Project {
     characters[0].relations = `Croise ${characters
       .slice(1)
       .map((c) => c.name)
-      .join(' et ')} au fil des episodes.`
+      .join(' et ')} au fil des videos.`
   }
 
   const aspect = preset.aspect as Project['settings']['aspect']
-  const pilot = buildPilot(rng, u, formats[0], characters, places, props, direction, aspect)
+  const pilot = buildPilot(rng, formats[0], characters, places, props, direction, aspect)
 
   const project: Project = {
     id: uid('prj'),
@@ -369,14 +351,13 @@ export function generateProject(opts: GenerateOptions = {}): Project {
     seedText: opts.brief ?? '',
     seedNumber: seed,
     universeId: u.id,
-    platform,
     artist,
     direction,
     characters,
     places,
     props,
     formats,
-    episodes: [pilot],
+    videos: [pilot],
     refs: [],
     settings: {
       duration: preset.duration,

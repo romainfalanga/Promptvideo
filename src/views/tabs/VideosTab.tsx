@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import type { AspectRatio, Episode, Project, Resolution, Shot, ShotSize } from '../../types'
+import type { AspectRatio, Video, Project, Resolution, Shot, ShotSize } from '../../types'
 import { updateProject } from '../../store'
 import {
   ASPECTS,
@@ -11,7 +11,7 @@ import {
   formatTimecode,
   promptWordBudget,
 } from '../../data/seedance'
-import { compileEpisode, compileShot } from '../../engine/prompt'
+import { compileVideo, compileShot } from '../../engine/prompt'
 import { cx, uid } from '../../lib/utils'
 import {
   Area,
@@ -54,8 +54,8 @@ function blankShot(start: number, end: number, lens: string): Shot {
   }
 }
 
-export default function EpisodesTab({ project }: { project: Project }) {
-  const [openId, setOpenId] = useState<string | null>(project.episodes[0]?.id ?? null)
+export default function VideosTab({ project }: { project: Project }) {
+  const [openId, setOpenId] = useState<string | null>(project.videos[0]?.id ?? null)
 
   const addFromFormat = (formatId: string) => {
     const f = project.formats.find((x) => x.id === formatId)
@@ -73,9 +73,9 @@ export default function EpisodesTab({ project }: { project: Project }) {
           characterIds: i === 0 ? [] : d.characters[0] ? [d.characters[0].id] : [],
         }),
       )
-      d.episodes.push({
+      d.videos.push({
         id,
-        title: f ? `${f.name} — episode ${d.episodes.length + 1}` : `Episode ${d.episodes.length + 1}`,
+        title: f ? `${f.name} — video ${d.videos.length + 1}` : `Video ${d.videos.length + 1}`,
         formatId: f?.id ?? null,
         logline: f?.pitch ?? '',
         lyrics: '',
@@ -87,8 +87,6 @@ export default function EpisodesTab({ project }: { project: Project }) {
         cameraFixed: d.settings.cameraFixed,
         seed: '',
         shots,
-        caption: f ? `${f.pitch}\n\n${f.cta}` : '',
-        hashtags: [],
         status: 'ecrit',
       })
     })
@@ -98,8 +96,8 @@ export default function EpisodesTab({ project }: { project: Project }) {
   return (
     <div className="space-y-4">
       <Card
-        title="Episodes"
-        subtitle={`Chaque episode se compile en un prompt multi-plans timecode. Duree autorisee : ${SEEDANCE.duration.min} a ${SEEDANCE.duration.max} secondes.`}
+        title="Videos"
+        subtitle={`Chaque video se compile en un prompt multi-plans timecode. Duree autorisee : ${SEEDANCE.duration.min} a ${SEEDANCE.duration.max} secondes.`}
         actions={
           <>
             {project.formats.map((f) => (
@@ -108,16 +106,16 @@ export default function EpisodesTab({ project }: { project: Project }) {
               </button>
             ))}
             <button type="button" className="btn-primary px-3 py-1.5 text-[12px]" onClick={() => addFromFormat('')}>
-              + Episode vierge
+              + Video vierge
             </button>
           </>
         }
       >
-        {project.episodes.length === 0 ? (
-          <Empty title="Aucun episode" hint="Cree un episode a partir d'un format : les beats deviennent les plans." />
+        {project.videos.length === 0 ? (
+          <Empty title="Aucune video" hint="Cree une video a partir d'un format : les beats deviennent les plans." />
         ) : (
           <div className="flex flex-wrap gap-2">
-            {project.episodes.map((e) => (
+            {project.videos.map((e) => (
               <button
                 key={e.id}
                 type="button"
@@ -137,11 +135,11 @@ export default function EpisodesTab({ project }: { project: Project }) {
         )}
       </Card>
 
-      {project.episodes
+      {project.videos
         .filter((e) => e.id === openId)
         .map((e) => (
-          <EpisodeSheet key={e.id} project={project} episode={e} onDelete={() => {
-            updateProject(project.id, (d) => { d.episodes = d.episodes.filter((x) => x.id !== e.id) })
+          <VideoSheet key={e.id} project={project} video={e} onDelete={() => {
+            updateProject(project.id, (d) => { d.videos = d.videos.filter((x) => x.id !== e.id) })
             setOpenId(null)
           }} />
         ))}
@@ -151,27 +149,27 @@ export default function EpisodesTab({ project }: { project: Project }) {
 
 /* ------------------------------------------------------------------ */
 
-function EpisodeSheet({ project, episode, onDelete }: { project: Project; episode: Episode; onDelete: () => void }) {
-  const patch = (m: (e: Episode) => void) =>
+function VideoSheet({ project, video, onDelete }: { project: Project; video: Video; onDelete: () => void }) {
+  const patch = (m: (e: Video) => void) =>
     updateProject(project.id, (d) => {
-      const e = d.episodes.find((x) => x.id === episode.id)
+      const e = d.videos.find((x) => x.id === video.id)
       if (e) m(e)
     })
 
-  const compiled = compileEpisode(project, episode)
+  const compiled = compileVideo(project, video)
   const words = compiled.bodyWords
-  const budget = promptWordBudget(episode.shots.length)
+  const budget = promptWordBudget(video.shots.length)
   const wordTone = words > budget.max ? 'text-signal-bad' : words < budget.min ? 'text-signal-warn' : 'text-signal-ok'
 
   const addShot = () => {
-    const last = episode.shots[episode.shots.length - 1]
+    const last = video.shots[video.shots.length - 1]
     const start = last ? last.end : 0
     patch((e) => {
       e.shots.push(blankShot(start, Math.min(e.duration, start + 5), project.direction.lensKit[0] ?? '35 mm'))
     })
   }
 
-  /** Repartit uniformement les plans sur la duree de l'episode. */
+  /** Repartit uniformement les plans sur la duree de la video. */
   const redistribute = () =>
     patch((e) => {
       const n = e.shots.length
@@ -186,17 +184,17 @@ function EpisodeSheet({ project, episode, onDelete }: { project: Project; episod
   return (
     <div className="space-y-4">
       <Card
-        title={episode.title}
-        subtitle={episode.logline}
-        actions={<ConfirmButton label="Supprimer" confirmLabel="Supprimer cet episode ?" onConfirm={onDelete} className="px-3 py-1.5 text-[12px]" />}
+        title={video.title}
+        subtitle={video.logline}
+        actions={<ConfirmButton label="Supprimer" confirmLabel="Supprimer cette video ?" onConfirm={onDelete} className="px-3 py-1.5 text-[12px]" />}
       >
         <div className="space-y-4">
-          <Field label="Titre" value={episode.title} onChange={(v) => patch((e) => { e.title = v })} />
+          <Field label="Titre" value={video.title} onChange={(v) => patch((e) => { e.title = v })} />
 
           <Grid cols={2}>
             <Area
               label="Paroles de ce passage"
-              value={episode.lyrics}
+              value={video.lyrics}
               onChange={(v) => patch((e) => { e.lyrics = v })}
               rows={4}
               placeholder="Colle ici les lignes du morceau sur lesquelles cette scene tombe."
@@ -204,7 +202,7 @@ function EpisodeSheet({ project, episode, onDelete }: { project: Project; episod
             />
             <Area
               label="Idee visuelle"
-              value={episode.visualIdea}
+              value={video.visualIdea}
               onChange={(v) => patch((e) => { e.visualIdea = v })}
               rows={4}
               placeholder="La metaphore ou la situation inattendue que cherche cette scene."
@@ -212,10 +210,10 @@ function EpisodeSheet({ project, episode, onDelete }: { project: Project; episod
             />
           </Grid>
 
-          <Area label="Logline" value={episode.logline} onChange={(v) => patch((e) => { e.logline = v })} rows={2} hint="Deuxieme phrase du prompt." />
+          <Area label="Logline" value={video.logline} onChange={(v) => patch((e) => { e.logline = v })} rows={2} hint="Deuxieme phrase du prompt." />
           <Area
-            label="Continuite avec l'episode precedent"
-            value={episode.continuity}
+            label="Continuite avec la video precedent"
+            value={video.continuity}
             onChange={(v) => patch((e) => { e.continuity = v })}
             rows={2}
             placeholder="ex. meme tenue, la scene est censee suivre immediatement"
@@ -224,7 +222,7 @@ function EpisodeSheet({ project, episode, onDelete }: { project: Project; episod
           <Grid cols={3}>
             <NumberField
               label="Duree"
-              value={episode.duration}
+              value={video.duration}
               min={SEEDANCE.duration.min}
               max={SEEDANCE.duration.max}
               suffix="s"
@@ -232,13 +230,13 @@ function EpisodeSheet({ project, episode, onDelete }: { project: Project; episod
             />
             <Select
               label="Format"
-              value={episode.aspect}
+              value={video.aspect}
               onChange={(v: AspectRatio) => patch((e) => { e.aspect = v })}
               options={ASPECTS.map((a) => ({ value: a.value, label: `${a.label} — ${a.usage}` }))}
             />
             <Select
               label="Resolution"
-              value={episode.resolution}
+              value={video.resolution}
               onChange={(v: Resolution) => patch((e) => { e.resolution = v })}
               options={RESOLUTIONS.map((r) => ({ value: r, label: r }))}
             />
@@ -247,13 +245,13 @@ function EpisodeSheet({ project, episode, onDelete }: { project: Project; episod
           <Grid cols={2}>
             <Toggle
               label="Camera verrouillee"
-              checked={episode.cameraFixed}
+              checked={video.cameraFixed}
               onChange={(v) => patch((e) => { e.cameraFixed = v })}
               hint="Bride le modele vers un plan fixe."
             />
             <Field
               label="Seed (facultatif)"
-              value={episode.seed}
+              value={video.seed}
               onChange={(v) => patch((e) => { e.seed = v })}
               mono
               hint="Rejouer exactement la meme generation."
@@ -276,13 +274,13 @@ function EpisodeSheet({ project, episode, onDelete }: { project: Project; episod
           </>
         }
       >
-        <Timeline episode={episode} />
+        <Timeline video={video} />
         <div className="mt-4 space-y-3">
-          {episode.shots.map((s, i) => (
+          {video.shots.map((s, i) => (
             <ShotRow
               key={s.id}
               project={project}
-              episode={episode}
+              video={video}
               shot={s}
               index={i}
               onPatch={(m) => patch((e) => { const t = e.shots.find((x) => x.id === s.id); if (t) m(t) })}
@@ -297,7 +295,7 @@ function EpisodeSheet({ project, episode, onDelete }: { project: Project; episod
               onDelete={() => patch((e) => { e.shots = e.shots.filter((x) => x.id !== s.id) })}
             />
           ))}
-          {episode.shots.length === 0 && <p className="text-[12.5px] text-ink-500">Aucun plan. Ajoute-en au moins un.</p>}
+          {video.shots.length === 0 && <p className="text-[12.5px] text-ink-500">Aucun plan. Ajoute-en au moins un.</p>}
         </div>
       </Card>
 
@@ -321,18 +319,18 @@ function EpisodeSheet({ project, episode, onDelete }: { project: Project; episod
             <CodeBlock text={compiled.full} maxHeight={520} />
           </div>
           <p className="text-[11.5px] leading-relaxed text-ink-500">
-            Cible pour {episode.shots.length} plan{episode.shots.length > 1 ? 's' : ''} : {budget.min} a {budget.sweet} mots
+            Cible pour {video.shots.length} plan{video.shots.length > 1 ? 's' : ''} : {budget.min} a {budget.sweet} mots
             dans le corps narratif (plafond {budget.max}). En dessous, le modele improvise ; au-dessus, il dilue les
             consignes. Les ancres d&apos;identite ne sont pas comptees : ce sont des rappels techniques.
           </p>
         </div>
       </Card>
 
-      {episode.shots.length > 1 && (
+      {video.shots.length > 1 && (
         <Collapse title="Variante plan par plan (clips courts a monter)">
           <div className="space-y-3">
-            {episode.shots.map((s) => {
-              const c = compileShot(project, episode, s)
+            {video.shots.map((s) => {
+              const c = compileShot(project, video, s)
               return (
                 <div key={s.id} className="rounded-lg border border-ink-700/70 bg-ink-850/40 p-3">
                   <div className="mb-2 flex items-center justify-between gap-3">
@@ -349,35 +347,20 @@ function EpisodeSheet({ project, episode, onDelete }: { project: Project; episod
         </Collapse>
       )}
 
-      <Card title="Publication" subtitle="Texte de la legende et hashtags, prets a coller sur la plateforme.">
-        <Grid cols={2}>
-          <Area label="Legende" value={episode.caption} onChange={(v) => patch((e) => { e.caption = v })} rows={4} />
-          <div>
-            <Field
-              label="Hashtags (separes par des espaces)"
-              value={episode.hashtags.join(' ')}
-              onChange={(v) => patch((e) => { e.hashtags = v.split(/\s+/).map((h) => h.replace(/^#/, '')).filter(Boolean) })}
-            />
-            <div className="mt-3 flex flex-wrap gap-1.5">
-              {episode.hashtags.map((h) => (
-                <span key={h} className="chip">#{h}</span>
-              ))}
-            </div>
-            <div className="mt-4">
-              <Select
-                label="Statut"
-                value={episode.status}
-                onChange={(v: Episode['status']) => patch((e) => { e.status = v })}
-                options={[
-                  { value: 'idee', label: 'Idee' },
-                  { value: 'ecrit', label: 'Ecrit' },
-                  { value: 'pret', label: 'Pret a generer' },
-                  { value: 'genere', label: 'Genere' },
-                ]}
-              />
-            </div>
-          </div>
-        </Grid>
+      <Card title="Suivi" subtitle="Ou en est cette video dans ta production.">
+        <div className="max-w-xs">
+          <Select
+            label="Statut"
+            value={video.status}
+            onChange={(v: Video['status']) => patch((e) => { e.status = v })}
+            options={[
+              { value: 'idee', label: 'Idee' },
+              { value: 'ecrit', label: 'Ecrit' },
+              { value: 'pret', label: 'Pret a generer' },
+              { value: 'genere', label: 'Genere' },
+            ]}
+          />
+        </div>
       </Card>
     </div>
   )
@@ -385,13 +368,13 @@ function EpisodeSheet({ project, episode, onDelete }: { project: Project; episod
 
 /* ------------------------------------------------------------------ */
 
-function Timeline({ episode }: { episode: Episode }) {
-  if (!episode.shots.length) return null
+function Timeline({ video }: { video: Video }) {
+  if (!video.shots.length) return null
   return (
     <div>
       <div className="flex h-8 w-full overflow-hidden rounded-lg border border-ink-700 bg-ink-850">
-        {episode.shots.map((s, i) => {
-          const w = Math.max(2, ((s.end - s.start) / Math.max(1, episode.duration)) * 100)
+        {video.shots.map((s, i) => {
+          const w = Math.max(2, ((s.end - s.start) / Math.max(1, video.duration)) * 100)
           return (
             <div
               key={s.id}
@@ -406,7 +389,7 @@ function Timeline({ episode }: { episode: Episode }) {
       </div>
       <div className="mt-1 flex justify-between text-[10.5px] text-ink-500">
         <span>0:00</span>
-        <span>{formatTimecode(episode.duration)}</span>
+        <span>{formatTimecode(video.duration)}</span>
       </div>
     </div>
   )
@@ -456,7 +439,7 @@ function PickField({
 
 function ShotRow({
   project,
-  episode,
+  video,
   shot,
   index,
   onPatch,
@@ -464,7 +447,7 @@ function ShotRow({
   onDelete,
 }: {
   project: Project
-  episode: Episode
+  video: Video
   shot: Shot
   index: number
   onPatch: (m: (s: Shot) => void) => void
@@ -503,8 +486,8 @@ function ShotRow({
         <div className="space-y-4 border-t border-ink-700/70 p-4">
           <Grid cols={3}>
             <Field label="Intitule du plan" value={shot.label} onChange={(v) => set('label', v)} />
-            <NumberField label="Debut" value={shot.start} min={0} max={episode.duration} suffix="s" onChange={(v) => set('start', v)} />
-            <NumberField label="Fin" value={shot.end} min={0} max={episode.duration} suffix="s" onChange={(v) => set('end', v)} />
+            <NumberField label="Debut" value={shot.start} min={0} max={video.duration} suffix="s" onChange={(v) => set('start', v)} />
+            <NumberField label="Fin" value={shot.end} min={0} max={video.duration} suffix="s" onChange={(v) => set('end', v)} />
           </Grid>
 
           <Grid cols={2}>

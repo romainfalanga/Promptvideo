@@ -1,11 +1,11 @@
 # Promptvideo Studio
 
-Atelier de création de **comptes vidéo pilotés par Seedance 2.5**.
+**Générateur de prompts pour Seedance 2.5.**
 
-On y construit un artiste, sa direction artistique, son casting, ses lieux et ses
-formats récurrents ; on en sort, au bout de la chaîne, **un document à
-copier-coller** contenant tout ce qu'il faut pour produire les vidéos, plus la
-**liste ordonnée des références** à joindre.
+On décrit une vidéo, on récupère le prompt prêt à coller et la **liste ordonnée
+des références** à joindre. Les *univers* — direction artistique, personnages,
+lieux, références — servent à tenir la cohérence : mêmes visages, mêmes décors,
+même texture d'une vidéo à l'autre.
 
 ```bash
 npm install
@@ -22,40 +22,48 @@ stocké en `localStorage` et exportable en JSON.
 
 ## Les trois points d'entrée
 
-### Artistes — un socle fourni, appliqué tel quel
+### Nouvelle vidéo — le parcours principal
+
+Décris ce que tu veux voir, choisis la durée et le format, obtiens le prompt.
+Rattache la vidéo à un univers pour qu'elle hérite de sa direction artistique,
+de ses personnages et de ses lieux. Le générateur choisit le décor mentionné
+dans ton texte, et à défaut celui qui a le moins servi — pour ne pas rejouer
+toujours le même.
+
+### Univers fournis — un socle appliqué tel quel
 
 Quand un artiste fournit sa direction artistique complète, il n'y a rien à tirer au
-sort : le compte s'ouvre déjà écrit, en un clic depuis l'accueil.
+sort : l'univers s'ouvre déjà écrit, en un clic depuis l'accueil.
 
-**Vland** est le premier préréglage : clip nocturne, texture VHS / mini-DV, jeune
+**Vland** est le premier univers fourni : clip nocturne, texture VHS / mini-DV, jeune
 rappeur contemporain. Il apporte 13 traits de texture cumulés, 22 environnements en
 rotation, 17 micro-actions de figuration, une garde-robe, une politique de regard par
 personnage, des transitions motivées, des règles de continuité, 3 personnages
-récurrents, 6 lieux, 3 formats de 15 s et un épisode pilote exemplaire.
+récurrents, 6 lieux, 3 formats de 15 s et une vidéo pilote exemplaire.
 
 Ses références d'identité sont marquées **photo fournie** : elles ne doivent jamais
 être régénérées, c'est ce qui fixe le visage d'une vidéo à l'autre.
 
 ## Les deux modes
 
-### Mode Studio — l'outil propose des comptes complets
+### Idées d'univers — l'outil propose des univers complets
 
-Le moteur assemble un compte entier à partir d'une bibliothèque de **neuf univers**
+Le moteur assemble un univers entier à partir d'une bibliothèque de **neuf univers**
 écrits pour tenir ensemble (une palette va avec une lumière, qui va avec une texture,
-qui va avec une grammaire caméra). Chaque proposition contient un artiste, une
-direction artistique, un casting, des lieux, un format récurrent et un épisode pilote.
+qui va avec une grammaire caméra). Chaque proposition contient une
+direction artistique, un casting, des lieux, un format récurrent et une vidéo pilote.
 
 La génération est **déterministe** : une même graine redonne exactement le même
-compte, ce qui permet de rejouer, comparer et affiner une idée.
+univers, ce qui permet de rejouer, comparer et affiner une idée.
 
-### Mode Sur-Mesure — l'utilisateur décrit, l'outil déploie
+### Créer un univers — l'utilisateur décrit, l'outil déploie
 
 Le texte libre de l'utilisateur est **conservé mot pour mot** comme colonne
-vertébrale du compte (notes, mission de l'artiste, pitch visuel, logline du pilote).
+vertébrale de l'univers (notes, intention, pitch visuel, logline du pilote).
 L'interpréteur :
 
 - classe les univers par affinité de vocabulaire pour en tirer une direction artistique ;
-- déduit plateforme, format et durée quand ils sont mentionnés ;
+- déduit le format et la durée quand ils sont mentionnés ;
 - détecte le ton ;
 - repère les noms propres et **demande** s'ils sont un personnage, un lieu, ou rien —
   il ne devine pas, parce qu'un nom propre est aussi souvent l'un que l'autre.
@@ -66,10 +74,10 @@ L'interpréteur :
 
 | Étape | Onglet | Ce qui s'y passe |
 |---|---|---|
-| 1 | Amorce | Mode Studio ou Mode Sur-Mesure |
-| 2 | Artiste · Direction · Casting · Lieux · Formats | Élaboration des documents, fiche par fiche |
+| 1 | Nouvelle vidéo | Décrire une vidéo, obtenir son prompt |
+| 2 | Identité · Direction · Casting · Lieux · Formats | Élaboration des documents, fiche par fiche |
 | 3 | Références | Manifeste dérivé automatiquement, avec le prompt de fabrication de chaque référence |
-| 4 | Épisodes · Réglages | Écriture plan par plan, compilation du prompt en direct |
+| 4 | Vidéos · Réglages | Écriture plan par plan, compilation du prompt en direct |
 | 5 | Audit · Export | Contrôle qualité, puis le document final |
 
 ---
@@ -83,7 +91,7 @@ Le compilateur et l'audit sont calés sur les contraintes réelles du modèle
 - **Références** : 30 images, 10 vidéos, 10 audio, 50 au total. Au-delà de
   **8 sujets principaux**, les traits distinctifs se diluent — l'audit le signale.
 - **Numérotation par ordre d'envoi** : le premier fichier joint est `@Image1`.
-  Un épisode qui n'utilise qu'une partie du manifeste **recalcule ses propres
+  Une vidéo qui n'utilise qu'une partie du manifeste **recalcule ses propres
   numéros**, et sa liste de fichiers est livrée avec son prompt.
 - **Ordre du prompt** : sujet + action d'abord (les 20-30 premiers mots pèsent le
   plus), puis la scène, puis le style, puis la caméra et l'audio.
@@ -111,15 +119,15 @@ automatiquement dans les prompts :
 | Registre émotionnel | Une image jolie mais sans intention |
 | Transitions motivées | Des coupes arbitraires |
 | Réservoir d'environnements | Deux fois le même décor |
-| Règles de continuité | Le personnage qui change entre deux épisodes |
+| Règles de continuité | Le personnage qui change entre deux vidéos |
 
 Chaque plan porte en plus sa **vie de fond**, son **élément en mouvement** et sa
-**sortie motivée** ; chaque épisode porte ses **paroles**, son **idée visuelle** et sa
-**continuité** avec le précédent.
+**sortie motivée** ; chaque vidéo porte ses **paroles**, son **idée visuelle** et sa
+**continuité** avec la précédente.
 
 ### Cohérence entre les vidéos
 
-Trois mécanismes, parce que c'est là que les comptes IA s'effondrent d'habitude :
+Trois mécanismes, parce que c'est là que les univers IA s'effondrent d'habitude :
 
 1. **L'ancre d'identité** — un descripteur canonique compact par personnage
    (âge, morphologie, visage, cheveux, peau, yeux, signe distinctif, costume),
@@ -127,10 +135,10 @@ Trois mécanismes, parce que c'est là que les comptes IA s'effondrent d'habitud
    moins de 12 mots.
 2. **La politique de regard** — un champ par personnage. Sans consigne explicite, le
    modèle fait poser le sujet face objectif ; c'est le premier réflexe à désamorcer sur
-   un compte qui veut avoir l'air pris sur le vif.
+   un univers qui veut avoir l'air pris sur le vif.
 3. **Le manifeste de références** — pour chaque personnage une planche visage et une
    planche costume, pour chaque lieu une plaque de décor vide, plus une planche de
-   style pour tout le compte. Un personnage marqué *collectif* reçoit une planche de
+   style pour tout l'univers. Un personnage marqué *collectif* reçoit une planche de
    groupe au lieu de trois fiches d'identité. Chaque slot est livré avec le prompt qui
    permet de fabriquer l'image — sauf les photos fournies par l'artiste, signalées
    comme telles pour ne jamais être régénérées.
@@ -139,13 +147,13 @@ Trois mécanismes, parce que c'est là que les comptes IA s'effondrent d'habitud
 
 ## Les cinq exports
 
-- **Le Compte** — le document complet : artiste, direction artistique, casting, lieux,
+- **La Bible** — le document complet : identité, direction artistique, casting, lieux,
   accessoires, formats, réglages, manifeste, prompts et mode d'emploi.
 - **Pack Seedance** — la version courte : liste ordonnée des fichiers, puis un prompt
-  par épisode. Rien d'autre.
+  par vidéo. Rien d'autre.
 - **Manifeste de références** — les références seules, avec leur prompt de fabrication.
 - **Brief à déléguer** — à coller dans un assistant conversationnel pour faire écrire
-  de nouveaux épisodes dans la même direction artistique, en ciblant les manques
+  de nouvelles vidéos dans la même direction artistique, en ciblant les manques
   relevés par l'audit.
 - **JSON** — sauvegarde complète, réimportable depuis l'accueil.
 

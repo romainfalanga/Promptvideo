@@ -1,17 +1,17 @@
 /**
  * Exports.
  *
- * « Le Compte » est le document unique a copier-coller : il contient tout
- * ce qu'il faut pour lancer la production, y compris les prompts prets a
- * l'emploi et la liste ordonnee des fichiers a joindre.
+ * « La Bible » est le document unique a copier-coller : la direction
+ * artistique complete, les personnages, les lieux, le manifeste de
+ * references et les prompts prets a coller dans Seedance.
  */
 
-import type { Episode, Project } from '../types'
+import type { Video, Project } from '../types'
 import { AUDIO_LEGEND, PROMPT_RULES, SEEDANCE, promptWordBudget } from '../data/seedance'
 import { getUniverse } from '../data/universes'
 import { formatDate } from '../lib/utils'
 import { auditProject, scorePercent } from './audit'
-import { compileEpisode, compileShot } from './prompt'
+import { compileVideo, compileShot } from './prompt'
 import { indexReferences, refStats } from './references'
 
 const RULE = '─'.repeat(70)
@@ -64,8 +64,8 @@ export function exportReferenceManifest(project: Project): string {
     '',
     "> L'ORDRE D'ENVOI FAIT LE NUMERO. Le premier fichier joint est @Image1, le deuxieme @Image2, etc.",
     '> Les tokens ci-dessous valent si tu envoies le manifeste EN ENTIER.',
-    "> Un episode qui n'utilise qu'une partie des references recalcule ses propres numeros :",
-    "> fie-toi toujours a la liste « fichiers a joindre » livree avec le prompt de l'episode.",
+    "> Une video qui n'utilise qu'une partie des references recalcule ses propres numeros :",
+    "> fie-toi toujours a la liste « fichiers a joindre » livree avec le prompt de la video.",
     '',
     '| Token | Fichier | Role |',
     '|---|---|---|',
@@ -79,18 +79,18 @@ export function exportReferenceManifest(project: Project): string {
 /* Prompts                                                             */
 /* ------------------------------------------------------------------ */
 
-export function exportEpisodePrompt(project: Project, episode: Episode): string {
-  const c = compileEpisode(project, episode)
+export function exportVideoPrompt(project: Project, video: Video): string {
+  const c = compileVideo(project, video)
   return block([
-    `### ${episode.title}`,
-    episode.visualIdea ? `**Idee visuelle** : ${episode.visualIdea}` : '',
-    episode.lyrics ? `\n**Paroles de ce passage :**\n> ${episode.lyrics.split('\n').join('\n> ')}\n` : '',
-    episode.continuity ? `**Continuite** : ${episode.continuity}` : '',
-    kv('Duree', `${episode.duration} s`),
-    kv('Format', episode.aspect),
-    kv('Resolution', episode.resolution),
-    episode.cameraFixed ? '**Camera** : verrouillee' : '',
-    episode.seed ? kv('Seed', episode.seed) : '',
+    `### ${video.title}`,
+    video.visualIdea ? `**Idee visuelle** : ${video.visualIdea}` : '',
+    video.lyrics ? `\n**Paroles de ce passage :**\n> ${video.lyrics.split('\n').join('\n> ')}\n` : '',
+    video.continuity ? `**Continuite** : ${video.continuity}` : '',
+    kv('Duree', `${video.duration} s`),
+    kv('Format', video.aspect),
+    kv('Resolution', video.resolution),
+    video.cameraFixed ? '**Camera** : verrouillee' : '',
+    video.seed ? kv('Seed', video.seed) : '',
     '',
     c.header,
     '',
@@ -98,19 +98,19 @@ export function exportEpisodePrompt(project: Project, episode: Episode): string 
     '```',
     c.full,
     '```',
-    `_${c.bodyWords} mots dans le corps du prompt (cible pour ${episode.shots.length} plan(s) : ${promptWordBudget(episode.shots.length).min} a ${promptWordBudget(episode.shots.length).sweet})._`,
+    `_${c.bodyWords} mots dans le corps du prompt (cible pour ${video.shots.length} plan(s) : ${promptWordBudget(video.shots.length).min} a ${promptWordBudget(video.shots.length).sweet})._`,
   ])
 }
 
-export function exportShotPrompts(project: Project, episode: Episode): string {
-  if (episode.shots.length < 2) return ''
+export function exportShotPrompts(project: Project, video: Video): string {
+  if (video.shots.length < 2) return ''
   return block([
-    `#### Variante plan par plan — ${episode.title}`,
+    `#### Variante plan par plan — ${video.title}`,
     '',
     "_A utiliser si tu preferes generer des clips courts et les monter ensuite._",
     '',
-    ...episode.shots.map((s) => {
-      const c = compileShot(project, episode, s)
+    ...video.shots.map((s) => {
+      const c = compileShot(project, video, s)
       return block([
         `**${s.label || s.shotSize}** (${s.end - s.start} s)`,
         '```',
@@ -125,7 +125,7 @@ export function exportShotPrompts(project: Project, episode: Episode): string {
 /* Le Compte                                                           */
 /* ------------------------------------------------------------------ */
 
-export function exportAccount(project: Project): string {
+export function exportBible(project: Project): string {
   const u = getUniverse(project.universeId)
   const a = project.artist
   const d = project.direction
@@ -133,9 +133,9 @@ export function exportAccount(project: Project): string {
 
   const head = block([
     `# ${project.name}`,
-    `_@${a.handle} — ${a.tagline}_`,
+    `_${a.tagline}_`,
     '',
-    `> Compte genere avec Promptvideo Studio pour Seedance ${SEEDANCE.version}.`,
+    `> Bible d'univers generee avec Promptvideo Studio pour Seedance ${SEEDANCE.version}.`,
     `> Univers : ${u.emoji} ${u.name} · Origine : ${project.origin} · Graine : ${project.seedNumber} · Mis a jour le ${formatDate(project.updatedAt)}`,
     `> Score de completude : ${scorePercent(audit)} %`,
   ])
@@ -145,26 +145,17 @@ export function exportAccount(project: Project): string {
     : ''
 
   const artist = block([
-    '## 1. L\'artiste',
+    "## 1. L'identite",
     '',
     kv('Nom', a.name),
-    kv('Handle', `@${a.handle}`),
-    kv('Archetype', a.archetype),
-    kv('Mission', a.mission),
-    kv('Promesse tenue a chaque video', a.promise),
-    kv('Audience', a.audience),
-    kv('Voix et ton', a.voice),
+    kv('Qui filme', a.archetype),
+    kv('Intention', a.mission),
+    kv('Ton', a.voice),
     kv('Phrase signature', a.signature),
-    kv('Rythme de publication', a.cadence),
     '',
-    '**Bio prete a coller :**',
-    '```',
-    a.bio,
-    '```',
-    '',
-    a.lore ? `**Mythologie interne** : ${a.lore}` : '',
+    a.lore ? `**Le monde** : ${a.lore}` : '',
     a.values.length ? `\n**Valeurs** :\n${bullets(a.values)}` : '',
-    a.taboos.length ? `\n**Ce que le compte ne fera jamais** :\n${bullets(a.taboos)}` : '',
+    a.taboos.length ? `\n**Ce que ces videos ne feront jamais** :\n${bullets(a.taboos)}` : '',
   ])
 
   const direction = block([
@@ -202,7 +193,7 @@ export function exportAccount(project: Project): string {
     d.emotionalRegister.length ? `\n**Registre emotionnel** : ${d.emotionalRegister.join(' · ')}` : '',
     d.transitionTriggers.length ? `\n**Transitions motivees** :\n${bullets(d.transitionTriggers)}` : '',
     d.environmentPool.length ? `\n**Reservoir d'environnements** :\n${bullets(d.environmentPool)}` : '',
-    d.continuityRules.length ? `\n**Continuite entre episodes** :\n${bullets(d.continuityRules)}` : '',
+    d.continuityRules.length ? `\n**Continuite entre videos** :\n${bullets(d.continuityRules)}` : '',
     d.doList.length ? `\n**Toujours** :\n${bullets(d.doList)}` : '',
     d.dontList.length ? `\n**Jamais** :\n${bullets(d.dontList)}` : '',
   ])
@@ -287,7 +278,6 @@ export function exportAccount(project: Project): string {
             kv('Duree cible', `${f.duration} s`),
             kv('Accroche', f.hook),
             kv('Chute', f.payoff),
-            kv('Appel a l\'action', f.cta),
             f.beats.length ? `\n**Structure** :\n${f.beats.map((b, i) => `${i + 1}. ${b}`).join('\n')}` : '',
             f.recurring.length ? `\n**Elements recurrents** :\n${bullets(f.recurring)}` : '',
           ]),
@@ -314,10 +304,10 @@ export function exportAccount(project: Project): string {
 
   const refs = block(['## 8. References', '', exportReferenceManifest(project).replace(/^## Manifeste de references\n?/, '')])
 
-  const episodes = block([
-    '## 9. Episodes prets a generer',
+  const videos = block([
+    '## 9. Videos pretes a generer',
     '',
-    ...project.episodes.map((e) => block([exportEpisodePrompt(project, e), '', exportShotPrompts(project, e)])),
+    ...project.videos.map((e) => block([exportVideoPrompt(project, e), '', exportShotPrompts(project, e)])),
   ])
 
   const method = block([
@@ -326,8 +316,8 @@ export function exportAccount(project: Project): string {
     '1. Produis les references du manifeste (les prompts de fabrication sont fournis pour chacune).',
     '2. Verifie la planche visage de chaque personnage avant tout : c\'est elle qui tient la coherence.',
     `3. Joins les fichiers **dans l'ordre exact du manifeste** : le premier devient @Image1.`,
-    '4. Colle le prompt de l\'episode.',
-    '5. Genere, puis reutilise les memes references pour l\'episode suivant.',
+    '4. Colle le prompt de l\'video.',
+    '5. Genere, puis reutilise les memes references pour l\'video suivant.',
     '',
     '**Regles de redaction appliquees par cet export :**',
     '',
@@ -342,7 +332,7 @@ export function exportAccount(project: Project): string {
       ])
     : block(['## 11. Points a corriger', '', 'Aucun. Le compte est complet.'])
 
-  return [head, brief, artist, direction, cast, places, props, formats, settings, refs, episodes, method, auditBlock]
+  return [head, brief, artist, direction, cast, places, props, formats, settings, refs, videos, method, auditBlock]
     .filter(Boolean)
     .join(`\n\n${RULE}\n\n`)
 }
@@ -363,8 +353,8 @@ export function exportSeedancePack(project: Project): string {
     '',
     RULE,
     '',
-    ...project.episodes.map((e) => {
-      const c = compileEpisode(project, e)
+    ...project.videos.map((e) => {
+      const c = compileVideo(project, e)
       return block([`## ${e.title}  —  ${e.duration} s  ·  ${e.aspect}  ·  ${e.resolution}`, '', '```', c.full, '```'])
     }),
   ])
@@ -382,10 +372,10 @@ export function exportDelegationBrief(project: Project): string {
   const audit = auditProject(project)
   const gaps = audit.issues.filter((i) => i.level !== 'confort')
   return block([
-    "Tu es directeur artistique et showrunner. Voici un compte video en cours d'ecriture, destine a etre produit avec Seedance 2.5 (video 4 a 30 s, audio natif, references multimodales identifiees par leur ordre d'envoi : @Image1, @Image2...).",
+    "Tu es directeur artistique. Voici un univers video en cours d'ecriture, destine a etre produit avec Seedance 2.5 (video 4 a 30 s, audio natif, references multimodales identifiees par leur ordre d'envoi : @Image1, @Image2...).",
     '',
     'Ta mission : approfondir ce compte sans changer son identite. Tu dois rendre :',
-    '1. Trois nouveaux episodes complets, au format multi-plans timecode, respectant strictement la direction artistique ci-dessous.',
+    '1. Trois nouveaux videos completes, au format multi-plans timecode, respectant strictement la direction artistique ci-dessous.',
     '2. Les ancres d\'identite completees pour tout personnage dont la description est incomplete.',
     '3. Les references supplementaires necessaires, avec pour chacune : ce qu\'elle definit, ce qu\'il faut y ignorer, et son prompt de fabrication.',
     '',
@@ -393,7 +383,7 @@ export function exportDelegationBrief(project: Project): string {
     '',
     RULE,
     '',
-    exportAccount(project),
+    exportBible(project),
   ])
 }
 

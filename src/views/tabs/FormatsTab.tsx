@@ -1,7 +1,7 @@
 import type { Format, Project } from '../../types'
 import { updateProject } from '../../store'
 import { getUniverse } from '../../data/universes'
-import { CTA_POOL, HOOK_SHAPES } from '../../data/library'
+import { HOOK_SHAPES } from '../../data/library'
 import { SEEDANCE } from '../../data/seedance'
 import { makeRng, randomSeed, uid } from '../../lib/utils'
 import { Area, Card, ConfirmButton, Empty, Field, Grid, ListEditor, NumberField } from '../../components/ui'
@@ -25,7 +25,6 @@ export default function FormatsTab({ project }: { project: Project }) {
         beats: [],
         hook: '',
         payoff: '',
-        cta: '',
         recurring: [],
       })
     })
@@ -45,7 +44,6 @@ export default function FormatsTab({ project }: { project: Project }) {
         beats: [...s.beats],
         hook: s.hook,
         payoff: s.payoff,
-        cta: s.cta,
         recurring: [...s.recurring],
       })
     })
@@ -55,7 +53,7 @@ export default function FormatsTab({ project }: { project: Project }) {
     <div className="space-y-4">
       <Card
         title="Formats recurrents"
-        subtitle="Un format est un moule : meme structure, meme accroche, meme chute, contenu different. C'est ce qui rend un compte reconnaissable des la premiere seconde."
+        subtitle="Un format est un moule : meme structure, meme accroche, meme chute, contenu different. C'est ce qui rend un univers reconnaissable des la premiere seconde."
         actions={
           <>
             <button type="button" className="btn-ghost px-3 py-1.5 text-[12px]" onClick={addFromLibrary}>
@@ -85,7 +83,7 @@ export default function FormatsTab({ project }: { project: Project }) {
               onConfirm={() =>
                 updateProject(project.id, (d) => {
                   d.formats = d.formats.filter((x) => x.id !== f.id)
-                  d.episodes.forEach((e) => { if (e.formatId === f.id) e.formatId = null })
+                  d.videos.forEach((e) => { if (e.formatId === f.id) e.formatId = null })
                 })
               }
             />
@@ -117,19 +115,6 @@ export default function FormatsTab({ project }: { project: Project }) {
                 <textarea className="textarea" rows={2} value={f.hook} onChange={(e) => patch(f.id, (x) => { x.hook = e.target.value })} />
               </div>
               <Area label="Chute" value={f.payoff} onChange={(v) => patch(f.id, (x) => { x.payoff = v })} rows={2} />
-              <div>
-                <div className="flex items-center justify-between">
-                  <span className="label">Appel a l&apos;action</span>
-                  <button
-                    type="button"
-                    className="btn-quiet -mt-1 px-2 py-0.5 text-[11px]"
-                    onClick={() => patch(f.id, (x) => { x.cta = makeRng(randomSeed()).pick(CTA_POOL) })}
-                  >
-                    ↻ variante
-                  </button>
-                </div>
-                <input className="input" value={f.cta} onChange={(e) => patch(f.id, (x) => { x.cta = e.target.value })} />
-              </div>
             </div>
 
             <div className="space-y-4">
@@ -147,7 +132,7 @@ export default function FormatsTab({ project }: { project: Project }) {
                 placeholder="ex. meme carton horaire en ouverture"
               />
               <p className="text-[11.5px] leading-relaxed text-ink-500">
-                Les beats deviennent les plans quand tu crees un episode a partir de ce format,
+                Les beats deviennent les plans quand tu crees une video a partir de ce format,
                 avec leurs bornes temporelles calculees sur la duree cible.
               </p>
             </div>

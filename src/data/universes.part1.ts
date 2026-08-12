@@ -80,7 +80,7 @@ export const UNIVERSES_PART1: Universe[] = [
     ],
     promises: [
       'une histoire complete en moins de vingt secondes, chaque nuit',
-      'un lieu inconnu de la ville a chaque episode',
+      'un lieu inconnu de la ville a chaque video',
       'jamais deux fois la meme enseigne',
     ],
     signatures: ['Il pleut encore.', 'La ville respire, on ecoute.', 'Encore une nuit de gagnee.'],
@@ -106,7 +106,7 @@ export const UNIVERSES_PART1: Universe[] = [
         posture: 'toujours legerement penchee en avant, mains occupees',
         energy: 'calme econome, aucun geste inutile',
         voice: 'grave, rauque, phrases de cinq mots maximum',
-        arc: 'elle repare une enseigne par episode ; la derniere sera la sienne',
+        arc: 'elle repare une enseigne par video ; la derniere sera la sienne',
       },
       {
         name: 'Sora Benali',
@@ -125,7 +125,7 @@ export const UNIVERSES_PART1: Universe[] = [
         posture: 'en mouvement permanent, jamais assis',
         energy: 'nerveuse, en apnee',
         voice: 'rapide, essouflee, murmure',
-        arc: 'il transporte le meme colis depuis douze episodes sans jamais l\'ouvrir',
+        arc: 'il transporte le meme colis depuis douze videos sans jamais l\'ouvrir',
       },
       {
         name: 'Docteur Rhee',
@@ -144,7 +144,7 @@ export const UNIVERSES_PART1: Universe[] = [
         posture: 'immobile quand il parle, precis quand il agit',
         energy: 'douceur ferme, presence rassurante',
         voice: 'posee, articulee, accent leger',
-        arc: 'il soigne quelqu\'un par episode et refuse toujours d\'etre paye',
+        arc: 'il soigne quelqu\'un par video et refuse toujours d\'etre paye',
       },
       {
         name: 'Vex',
@@ -225,7 +225,7 @@ export const UNIVERSES_PART1: Universe[] = [
       },
     ],
     props: [
-      { name: 'La valise 08', description: 'valise metallique cabossee a fermetures multiples, autocollant a moitie gratte', role: 'objet transporte d\'episode en episode' },
+      { name: 'La valise 08', description: 'valise metallique cabossee a fermetures multiples, autocollant a moitie gratte', role: 'objet transporte d\'video en video' },
       { name: 'Le tube 4400', description: 'tube neon de rechange emballe dans du papier bulle, lueur cyan quand on le teste', role: 'motif visuel recurrent' },
       { name: 'Le carnet mouille', description: 'carnet a spirale gondole par l\'eau, ecriture au crayon presque effacee', role: 'support des cartons de texte' },
     ],
@@ -242,7 +242,6 @@ export const UNIVERSES_PART1: Universe[] = [
         ],
         hook: 'Ouvrir sur la panne, sans un mot',
         payoff: 'La lumiere qui se rallume dans le dernier tiers',
-        cta: 'Dis-moi quel objet je repare demain.',
         recurring: ['meme geste final de recul', 'meme carton horaire en ouverture'],
       },
       {
@@ -257,7 +256,6 @@ export const UNIVERSES_PART1: Universe[] = [
         ],
         hook: 'Le lieu vide tient trois secondes avant que quiconque entre',
         payoff: 'Le lieu redevient exactement identique a l\'ouverture',
-        cta: 'Quel lieu de nuit tu veux voir la semaine prochaine ?',
         recurring: ['plan d\'ouverture et de fermeture identiques', 'aucune parole'],
       },
       {
@@ -272,7 +270,6 @@ export const UNIVERSES_PART1: Universe[] = [
         ],
         hook: 'Insert macro sur un objet minuscule dans une flaque',
         payoff: 'La porte qui s\'ouvre juste apres que Vex soit parti',
-        cta: 'Tu as deja retrouve un objet perdu ? Raconte.',
         recurring: ['aucune parole humaine', 'meme cadrage de porte a la fin'],
       },
     ],
@@ -344,7 +341,7 @@ export const UNIVERSES_PART1: Universe[] = [
     missions: [
       'montrer combien de temps prend vraiment un objet fait a la main',
       'sauver un geste technique en voie de disparition',
-      'reparer un objet casse par episode plutot que d\'en fabriquer un neuf',
+      'reparer un objet casse par video plutot que d\'en fabriquer un neuf',
     ],
     audiences: [
       'public qui cherche du calme, 25-55 ans, toutes plateformes',
@@ -414,14 +411,14 @@ export const UNIVERSES_PART1: Universe[] = [
         hair: 'cheveux noirs mi-longs retenus par une pince en bois',
         skin: 'peau claire, rougeurs aux joues',
         eyes: 'yeux sombres, tres attentifs',
-        distinctive: 'pansement sur l\'index gauche a chaque episode',
+        distinctive: 'pansement sur l\'index gauche a chaque video',
         costume: 'tablier de cuir fauve marque de coupures, chemise blanche retroussee',
         accessories: 'alene, fil de lin cire, marteau de maroquinier',
         colorCode: 'fauve et blanc casse',
         posture: 'assise en tailleur sur un tabouret bas',
         energy: 'vive, un peu impatiente',
         voice: 'claire, commente ses erreurs a voix haute',
-        arc: 'elle progresse visiblement d\'un episode a l\'autre',
+        arc: 'elle progresse visiblement d\'une video a l\'autre',
       },
       {
         name: 'Le Fondeur',
@@ -440,7 +437,7 @@ export const UNIVERSES_PART1: Universe[] = [
         posture: 'de dos ou en amorce, toujours partiellement hors cadre',
         energy: 'puissance contenue',
         voice: 'aucune',
-        arc: 'chaque episode revele un detail de plus sans jamais montrer son visage',
+        arc: 'chaque video revele un detail de plus sans jamais montrer son visage',
       },
     ],
     places: [
@@ -502,7 +499,7 @@ export const UNIVERSES_PART1: Universe[] = [
       },
     ],
     props: [
-      { name: 'La tasse ebrechee', description: 'tasse en gres brun avec un eclat sur le bord, presente dans chaque episode', role: 'signature visuelle recurrente' },
+      { name: 'La tasse ebrechee', description: 'tasse en gres brun avec un eclat sur le bord, presente dans chaque video', role: 'signature visuelle recurrente' },
       { name: 'Le carnet de mesures', description: 'carnet a couverture toile, pages quadrillees couvertes de croquis au crayon', role: 'support des explications techniques' },
       { name: 'L\'outil herite', description: 'outil ancien au manche poli par l\'usage, initiales gravees', role: 'objet symbolique de transmission' },
     ],
@@ -519,7 +516,6 @@ export const UNIVERSES_PART1: Universe[] = [
         ],
         hook: 'Le cadre vide qui tient deux secondes',
         payoff: 'L\'objet fini seul au centre du cadre',
-        cta: 'Quel objet je fabrique la prochaine fois ?',
         recurring: ['meme cadrage d\'etabli', 'meme entree et sortie des mains'],
       },
       {
@@ -534,7 +530,6 @@ export const UNIVERSES_PART1: Universe[] = [
         ],
         hook: 'La cassure en tres gros plan, avant tout contexte',
         payoff: 'La reparation visible, jamais dissimulee',
-        cta: 'Envoie-moi ton objet casse en commentaire.',
         recurring: ['la cicatrice toujours laissee apparente', 'meme insert final'],
       },
       {
@@ -549,7 +544,6 @@ export const UNIVERSES_PART1: Universe[] = [
         ],
         hook: 'Le compteur qui demarre a zero',
         payoff: 'Le nombre d\'heures revele a la fin',
-        cta: 'Tu pensais que ca prenait combien de temps ?',
         recurring: ['meme typographie de compteur', 'meme carton d\'ouverture'],
       },
     ],
@@ -560,7 +554,7 @@ export const UNIVERSES_PART1: Universe[] = [
     id: 'archives97',
     name: 'Archives 1997',
     emoji: '📼',
-    pitch: 'Des bandes retrouvees, une enquete qui avance d\'un episode a l\'autre, et quelque chose qui ne devrait pas etre la.',
+    pitch: 'Des bandes retrouvees, une enquete qui avance d\'une video a l\'autre, et quelque chose qui ne devrait pas etre la.',
     keywords: ['vhs', 'found footage', 'mystere', 'archive', 'analog horror', 'enquete', 'annees 90', 'camescope', 'documentaire', 'disparition'],
     genres: ['found footage', 'mystere documentaire', 'horreur analogique douce'],
     palettes: [
@@ -618,7 +612,7 @@ export const UNIVERSES_PART1: Universe[] = [
     ],
     archetypes: ['archiviste qui numerise les bandes', 'ancien stagiaire du site', 'enqueteur anonyme', 'voix off qui commente les cassettes'],
     missions: [
-      'numeriser et publier une cassette par episode avant qu\'elles ne se degradent',
+      'numeriser et publier une cassette par video avant qu\'elles ne se degradent',
       'reconstituer ce qui s\'est passe entre deux bandes manquantes',
       'retrouver les personnes filmees en 1997',
     ],
@@ -632,9 +626,9 @@ export const UNIVERSES_PART1: Universe[] = [
       'commentaire chuchote par la personne qui filme',
     ],
     promises: [
-      'une cassette inedite par episode, numerotee',
+      'une cassette inedite par video, numerotee',
       'un detail cache dans chaque bande, jamais souligne',
-      'la chronologie respectee, aucun episode hors ordre',
+      'la chronologie respectee, aucune video hors ordre',
     ],
     signatures: ['Cassette suivante.', 'Fin de bande.', 'La suite existe. Elle est quelque part.'],
     values: ['rigueur documentaire', 'melancolie', 'precision'],
@@ -678,7 +672,7 @@ export const UNIVERSES_PART1: Universe[] = [
         posture: 'assis tres droit, mains a plat sur la table',
         energy: 'immobilite anormale',
         voice: 'monocorde, repond a cote des questions',
-        arc: 'son badge devient lisible dans le dernier episode',
+        arc: 'son badge devient lisible dans le derniere video',
       },
       {
         name: 'L\'operateur',
@@ -697,7 +691,7 @@ export const UNIVERSES_PART1: Universe[] = [
         posture: 'camera a hauteur de poitrine, jamais a l\'oeil',
         energy: 'hesitante, s\'arrete souvent',
         voice: 'chuchotements, jurons etouffes',
-        arc: 'sa respiration change au fil des episodes',
+        arc: 'sa respiration change au fil des videos',
       },
       {
         name: 'La voix du repondeur',
@@ -795,7 +789,6 @@ export const UNIVERSES_PART1: Universe[] = [
         ],
         hook: 'L\'etiquette manuscrite en tres gros plan',
         payoff: 'Un detail de la bande que le commentaire ne releve pas',
-        cta: 'Tu as vu ce que j\'ai rate ? Timecode en commentaire.',
         recurring: ['meme mire d\'ouverture', 'meme carton de classement final'],
       },
       {
@@ -810,7 +803,6 @@ export const UNIVERSES_PART1: Universe[] = [
         ],
         hook: 'Aucun titre, on tombe directement dans la bande',
         payoff: 'La coupure brutale, jamais expliquee',
-        cta: 'Qu\'est-ce qu\'il allait dire ?',
         recurring: ['fin systematique sur neige', 'aucun generique'],
       },
       {
@@ -825,7 +817,6 @@ export const UNIVERSES_PART1: Universe[] = [
         ],
         hook: 'Le meme cadre a vingt-neuf ans d\'ecart',
         payoff: 'L\'objet de 1997 encore present',
-        cta: 'Quel lieu je retourne voir ?',
         recurring: ['fondu enchaine passe/present', 'meme point de vue exact'],
       },
     ],

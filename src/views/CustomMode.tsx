@@ -1,5 +1,4 @@
 import { useMemo, useState } from 'react'
-import type { Platform } from '../types'
 import {
   detect,
   explainInterpretation,
@@ -9,26 +8,19 @@ import {
   type NounRole,
 } from '../engine/interpret'
 import { UNIVERSES, getUniverse } from '../data/universes'
-import { PLATFORM_PRESETS } from '../data/library'
 import { addProject } from '../store'
 import { Area, Card, Select, Swatches } from '../components/ui'
 import { cx } from '../lib/utils'
 
 const EXAMPLES = [
-  "Un compte sur un chat samourai qui vit dans le Tokyo des annees 80, filme la nuit sous la pluie, sans dialogue.",
+  "Un chat samourai dans le Tokyo des annees 80, filme la nuit sous la pluie, sans dialogue.",
   "Une grand-mere qui repare des objets casses dans son atelier, tres lent, sons de matiere uniquement, format vertical de 15 secondes.",
-  "Des cassettes VHS retrouvees dans un hopital ferme en 1997, une enquete qui avance episode apres episode.",
+  "Des cassettes VHS retrouvees dans un hopital ferme en 1997, une enquete qui avance video apres video.",
   "Un documentaire sur des creatures marines qui n'existent pas, voix off tres serieuse, pour s'endormir.",
-]
-
-const PLATFORM_OPTIONS: { value: Platform | ''; label: string }[] = [
-  { value: '', label: 'Deduire du texte' },
-  ...(Object.keys(PLATFORM_PRESETS) as Platform[]).map((k) => ({ value: k, label: PLATFORM_PRESETS[k].label })),
 ]
 
 export default function CustomMode() {
   const [brief, setBrief] = useState('')
-  const [platform, setPlatform] = useState<Platform | ''>('')
   const [forced, setForced] = useState<string>('')
   const [nouns, setNouns] = useState<Record<string, NounRole>>({})
   const [result, setResult] = useState<InterpretResult | null>(null)
@@ -40,7 +32,6 @@ export default function CustomMode() {
     if (!brief.trim()) return
     setResult(
       projectFromBrief(brief, {
-        platform: platform || undefined,
         universeId: forced || undefined,
         nouns: overrides ?? nouns,
       }),
@@ -61,22 +52,22 @@ export default function CustomMode() {
   return (
     <div className="space-y-6">
       <header className="max-w-3xl">
-        <h1 className="font-display text-3xl text-ink-100">Mode Sur-Mesure</h1>
+        <h1 className="font-display text-3xl text-ink-100">Créer un univers</h1>
         <p className="mt-2 text-[13.5px] leading-relaxed text-ink-400">
-          Ecris ton idee comme elle te vient. L&apos;outil la garde mot pour mot comme colonne vertebrale du compte,
-          reconnait l&apos;univers dont le vocabulaire s&apos;en rapproche le plus pour en tirer une direction
-          artistique coherente, cree les personnages que tu as nommes et deduit le format, la duree et la
-          plateforme si tu les mentionnes.
+          Écris ton idée comme elle te vient. L&apos;outil la garde mot pour mot comme colonne vertébrale de
+          l&apos;univers, reconnaît celui dont le vocabulaire s&apos;en rapproche le plus pour en tirer une
+          direction artistique cohérente, et déduit le format et la durée si tu les mentionnes. Tu pourras
+          ensuite y générer autant de vidéos que tu veux.
         </p>
       </header>
 
       <Card title="Ton idee" subtitle="Plus tu es precis sur le ton, le rythme et ce que tu ne veux pas, meilleur sera le squelette.">
         <Area
-          label="Decris le compte que tu veux"
+          label="Decris l'univers que tu veux"
           value={brief}
           onChange={setBrief}
           rows={6}
-          placeholder="ex. Un compte ou une chercheuse solitaire explore une station spatiale abandonnee. Tres calme, presque aucune parole, format vertical de 20 secondes, uniquement des sons de ventilation."
+          placeholder="ex. Une chercheuse solitaire explore une station spatiale abandonnee. Tres calme, presque aucune parole, format vertical de 20 secondes, uniquement des sons de ventilation."
         />
 
         <div className="mt-3 flex flex-wrap gap-2">
@@ -145,8 +136,7 @@ export default function CustomMode() {
           </div>
         )}
 
-        <div className="mt-4 grid gap-4 md:grid-cols-2">
-          <Select label="Plateforme" value={platform} onChange={setPlatform} options={PLATFORM_OPTIONS} />
+        <div className="mt-4">
           <Select
             label="Forcer un univers de reference"
             value={forced}
@@ -160,7 +150,7 @@ export default function CustomMode() {
 
         <div className="mt-4 flex items-center gap-3">
           <button type="button" className="btn-primary" onClick={() => run()} disabled={!brief.trim()}>
-            {result ? 'Reinterpreter' : 'Construire le compte'}
+            {result ? 'Reinterpreter' : "Construire l'univers"}
           </button>
           {result && (
             <button type="button" className="btn-quiet" onClick={() => setResult(null)}>
@@ -184,7 +174,7 @@ function Preview({ result, onKeep }: { result: InterpretResult; onKeep: () => vo
     <div className="grid gap-4 lg:grid-cols-[1.1fr_1fr]">
       <Card
         title={p.name}
-        subtitle={`@${p.artist.handle} · ${u.emoji} ${u.name}`}
+        subtitle={`${u.emoji} ${u.name}`}
         actions={
           <button type="button" className="btn-primary px-3.5 py-1.5 text-[13px]" onClick={onKeep}>
             Ouvrir dans l&apos;atelier
@@ -255,7 +245,7 @@ function Preview({ result, onKeep }: { result: InterpretResult; onKeep: () => vo
             <Stat n={p.places.length} label="lieux" />
             <Stat n={p.props.length} label="accessoires" />
             <Stat n={p.formats.length} label="formats" />
-            <Stat n={p.episodes.length} label="episode pilote" />
+            <Stat n={p.videos.length} label="video pilote" />
             <Stat n={p.refs.length} label="references decrites" />
           </div>
           <p className="mt-4 text-[12px] leading-relaxed text-ink-500">

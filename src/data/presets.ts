@@ -7,11 +7,11 @@
  * appliquer ce qu'il a dit.
  */
 
-import type { Character, Episode, Place, Project, Prop, Shot } from '../types'
+import type { Character, Video, Place, Project, Prop, Shot } from '../types'
 import { VLAND_UNIVERSE } from './universes.vland'
 import { buildDirection } from '../engine/generate'
 import { buildReferences } from '../engine/references'
-import { handleize, join, makeRng, uid } from '../lib/utils'
+import { join, makeRng, uid } from '../lib/utils'
 
 export interface ArtistPreset {
   id: string
@@ -39,7 +39,7 @@ function placeAnchorOf(p: Omit<Place, 'anchor' | 'id'>): string {
  */
 const GAZE = {
   vland:
-    "ne regarde presque jamais l'objectif ; il vit la scene, il ne pose pas. Un seul regard camera est autorise par episode, et seulement s'il a une raison",
+    "ne regarde presque jamais l'objectif ; il vit la scene, il ne pose pas. Un seul regard camera est autorise par video, et seulement s'il a une raison",
   crew: "ne regarde jamais l'objectif, meme brievement",
   elle: "ne regarde jamais l'objectif ; souvent de profil ou de dos",
 } as const
@@ -140,14 +140,14 @@ function vlandProps(): Prop[] {
 }
 
 /**
- * Episode pilote de Vland.
+ * Video pilote de Vland.
  *
  * Ecrit a la main plutot que derive du format : il sert de modele de
  * redaction, en montrant a quoi ressemble un fragment de quinze secondes
  * qui respecte le socle — entree masquee, vie de fond, element en mouvement,
  * sortie motivee.
  */
-function vlandPilot(characters: Character[], places: Place[], props: Prop[], formatId: string): Episode {
+function vlandPilot(characters: Character[], places: Place[], props: Prop[], formatId: string): Video {
   const vland = characters[0]
   const crew = characters[1]
   const station = places.find((p) => p.name === 'La station-service') ?? places[0]
@@ -235,8 +235,6 @@ function vlandPilot(characters: Character[], places: Place[], props: Prop[], for
         livingDetail: 'le vent dans les vetements',
       }),
     ],
-    caption: '',
-    hashtags: ['vland', 'clip', 'vhs', 'nuit'],
     status: 'ecrit',
   }
 }
@@ -274,7 +272,6 @@ function buildVland(): Project {
     beats: [...f.beats],
     hook: f.hook,
     payoff: f.payoff,
-    cta: f.cta,
     recurring: [...f.recurring],
   }))
 
@@ -287,22 +284,16 @@ function buildVland(): Project {
     seedText: '',
     seedNumber: 20260812,
     universeId: u.id,
-    platform: 'multi',
     artist: {
       name: 'Vland',
-      handle: handleize('Vland'),
       tagline: 'Des images volees a un clip nocturne.',
       archetype: 'jeune rappeur contemporain',
       mission:
-        'Publier des fragments de quinze secondes qui semblent extraits d’un meme clip nocturne, tourne a la camera analogique imparfaite.',
-      bio: 'Vland — fragments d’un clip nocturne. Une nuit, une camera, quinze secondes a la fois.',
+        'Produire des fragments de quinze secondes qui semblent extraits d’un meme clip nocturne, tourne a la camera analogique imparfaite.',
       lore:
         'Chaque video est un rush du meme clip. Le personnage, la texture et la colorimetrie ne changent jamais ; le lieu, la scene et l’idee visuelle changent a chaque fois. Le spectateur doit avoir l’impression de tomber sur des images qui n’etaient pas censees sortir.',
       voice: 'aucune narration : seules les paroles du morceau portent le texte',
-      audience: 'public rap et amateurs d’esthetique analogique, 16-30 ans',
-      promise: 'un fragment inedit a chaque publication, jamais deux fois le meme lieu',
       signature: 'La suite arrive.',
-      cadence: '3 videos par semaine (lundi, mercredi, vendredi)',
       values: ['authenticite', 'melancolie', 'obsession du detail'],
       taboos: [...u.taboos],
     },
@@ -311,7 +302,7 @@ function buildVland(): Project {
     places,
     props,
     formats,
-    episodes: [vlandPilot(characters, places, props, formats[0].id)],
+    videos: [vlandPilot(characters, places, props, formats[0].id)],
     refs: [],
     settings: {
       duration: 15,
@@ -338,13 +329,13 @@ function buildVland(): Project {
       ],
     },
     notes: [
-      'SOCLE APPLIQUE A TOUS LES EPISODES.',
+      'SOCLE APPLIQUE A TOUTES LES VIDEOS.',
       '',
       'Le scenario change d’une video a l’autre, l’identite visuelle ne bouge jamais.',
       'Chaque video fait environ 15 secondes et doit se lire comme un morceau d’un clip plus long.',
       '',
-      'Ecriture d’un nouvel episode :',
-      '1. Partir des paroles du morceau (champ « Paroles » de l’episode).',
+      'Ecriture d’une nouvelle video :',
+      '1. Partir des paroles du morceau (champ « Paroles » de la video).',
       '2. Chercher une idee visuelle forte — une metaphore, une situation inattendue — plutot qu’une illustration litterale.',
       '3. Choisir un lieu qui n’a pas encore servi, dans le reservoir d’environnements.',
       '4. Donner a chaque plan une vie de fond, un element en mouvement et une sortie motivee.',

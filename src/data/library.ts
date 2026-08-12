@@ -58,7 +58,6 @@ export interface FormatSeed {
   beats: string[]
   hook: string
   payoff: string
-  cta: string
   recurring: string[]
 }
 
@@ -146,23 +145,6 @@ export const RHYTHMS = [
   'trois blocs de duree egale, un par acte',
 ]
 
-export const CADENCES = [
-  '1 video par jour, meme heure',
-  '3 videos par semaine (lundi, mercredi, vendredi)',
-  '5 videos par semaine en semaine, pause le week-end',
-  '2 videos par semaine + 1 format long le dimanche',
-  '1 saison de 12 episodes publies quotidiennement, puis pause',
-]
-
-export const CTA_POOL = [
-  'Dis-moi en commentaire ce que tu veux voir dans le prochain episode.',
-  'Abonne-toi, l\'episode 2 tombe demain a la meme heure.',
-  'Enregistre si tu veux le revoir en entier.',
-  'Le nom du prochain lieu est dans les commentaires epingles.',
-  'Choisis la suite : option A ou option B en commentaire.',
-  'Partage a la personne qui pense exactement le contraire.',
-]
-
 export const HOOK_SHAPES = [
   'Ouvrir sur le detail le plus etrange, expliquer seulement apres.',
   'Poser une question a la premiere seconde, y repondre a la derniere.',
@@ -232,13 +214,16 @@ export const DEFAULT_TRANSITION_TRIGGERS = [
 
 export const DEFAULT_EMOTIONAL_REGISTER = ['presence', 'retenue', 'attention']
 
-export const PLATFORM_PRESETS = {
-  tiktok: { aspect: '9:16', duration: 12, label: 'TikTok' },
-  reels: { aspect: '9:16', duration: 15, label: 'Instagram Reels' },
-  shorts: { aspect: '9:16', duration: 20, label: 'YouTube Shorts' },
-  youtube: { aspect: '16:9', duration: 30, label: 'YouTube' },
-  multi: { aspect: '9:16', duration: 15, label: 'Multi-plateformes' },
-} as const
+/**
+ * Formats de sortie. Ce n'est pas une plateforme de publication : c'est le
+ * cadre et la duree que l'on demande a Seedance.
+ */
+export const OUTPUT_PRESETS = [
+  { id: 'vertical', label: 'Vertical 9:16', aspect: '9:16', duration: 15 },
+  { id: 'paysage', label: 'Paysage 16:9', aspect: '16:9', duration: 15 },
+  { id: 'scope', label: 'Scope 21:9', aspect: '21:9', duration: 20 },
+  { id: 'carre', label: 'Carre 1:1', aspect: '1:1', duration: 10 },
+] as const
 
 /** Types de references derivees automatiquement pour un personnage. */
 export const CHARACTER_REF_TYPES = [

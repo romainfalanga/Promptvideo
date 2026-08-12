@@ -109,7 +109,7 @@ export default function DirectionTab({ project }: { project: Project }) {
       </Grid>
 
       <Grid cols={2}>
-        <Card title="Optiques" subtitle="Les focales autorisees. Elles sont proposees plan par plan dans les episodes.">
+        <Card title="Optiques" subtitle="Les focales autorisees. Elles sont proposees plan par plan dans les videos.">
           <div className="flex flex-wrap gap-1.5">
             {LENSES.map((l) => {
               const on = d.lensKit.includes(l)
@@ -184,7 +184,7 @@ export default function DirectionTab({ project }: { project: Project }) {
             placeholder="ex. phares de voitures"
           />
         </Card>
-        <Card title="Mouvements de camera autorises" subtitle="Proposes plan par plan dans les episodes.">
+        <Card title="Mouvements de camera autorises" subtitle="Proposes plan par plan dans les videos.">
           <ListEditor
             label="Mouvements"
             items={d.cameraMoves}
@@ -286,7 +286,7 @@ export default function DirectionTab({ project }: { project: Project }) {
         </Card>
         <Card
           title="Regles de continuite"
-          subtitle="Ce qui doit rester identique d'un episode a l'autre. Rappele en fin de chaque prompt."
+          subtitle="Ce qui doit rester identique d'une video a l'autre. Rappele en fin de chaque prompt."
         >
           <ListEditor
             label="Continuite"

@@ -111,7 +111,7 @@ export default function CastTab({ project }: { project: Project }) {
         }
       >
         {project.characters.length === 0 ? (
-          <Empty title="Aucun personnage" hint="Un compte sans visage recurrent ne cree pas d'attachement." />
+          <Empty title="Aucun personnage" hint="Un univers sans visage recurrent ne cree pas d'attachement." />
         ) : (
           <div className="flex flex-wrap gap-2">
             {project.characters.map((c) => {
@@ -147,7 +147,7 @@ export default function CastTab({ project }: { project: Project }) {
             onDelete={() => {
               updateProject(project.id, (d) => {
                 d.characters = d.characters.filter((x) => x.id !== c.id)
-                d.episodes.forEach((e) => e.shots.forEach((s) => (s.characterIds = s.characterIds.filter((i) => i !== c.id))))
+                d.videos.forEach((e) => e.shots.forEach((s) => (s.characterIds = s.characterIds.filter((i) => i !== c.id))))
               })
               rebuildRefs(project.id)
               setOpenId(null)
@@ -184,7 +184,7 @@ function CharacterSheet({
       >
         <Grid cols={2}>
           <Field label="Nom" value={c.name} onChange={(v) => set('name', v)} />
-          <Field label="Role dans le compte" value={c.role} onChange={(v) => set('role', v)} />
+          <Field label="Role dans l'univers" value={c.role} onChange={(v) => set('role', v)} />
         </Grid>
         <div className="mt-4">
           <Field label="Accroche" value={c.tagline} onChange={(v) => set('tagline', v)} />
@@ -233,7 +233,7 @@ function CharacterSheet({
               value={c.gaze}
               onChange={(v) => set('gaze', v)}
               rows={3}
-              placeholder="ex. ne regarde presque jamais l'objectif ; un seul regard camera autorise par episode"
+              placeholder="ex. ne regarde presque jamais l'objectif ; un seul regard camera autorise par video"
               hint="Recopie dans chaque prompt ou ce personnage apparait."
             />
             <ListEditor

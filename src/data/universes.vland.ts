@@ -2,7 +2,7 @@
  * Socle de direction artistique — VLAND.
  *
  * Contrairement aux univers generiques, celui-ci n'est pas un reservoir a
- * combiner : c'est un socle ecrit, a appliquer tel quel a tous les episodes.
+ * combiner : c'est un socle ecrit, a appliquer tel quel a tous les videos.
  * Le scenario change d'une video a l'autre, l'identite visuelle ne bouge pas.
  */
 
@@ -259,7 +259,7 @@ export const VLAND_UNIVERSE: Universe = {
     'meme tenue lorsque la scene est censee etre immediatement enchainee a la precedente',
     'meme femme si le personnage revient',
     'memes amis si le scenario les reutilise',
-    'meme ambiance, meme texture VHS, meme colorimetrie d’un episode a l’autre',
+    'meme ambiance, meme texture VHS, meme colorimetrie d’une video a l’autre',
   ],
 
   soundSignatures: [
@@ -358,7 +358,7 @@ export const VLAND_UNIVERSE: Universe = {
       posture: 'detendue, jamais figee ; il occupe l’espace sans le surjouer',
       energy: 'confiance calme traversee de melancolie',
       voice: 'ne parle pas a la camera ; seules les paroles du morceau portent',
-      arc: 'la meme nuit se poursuit d’un episode a l’autre',
+      arc: 'la meme nuit se poursuit d’une video a l’autre',
     },
     {
       name: 'Le crew',
@@ -370,7 +370,7 @@ export const VLAND_UNIVERSE: Universe = {
       hair: 'a completer pour chacun',
       skin: 'a completer pour chacun',
       eyes: 'a completer pour chacun',
-      distinctive: 'chacun porte une piece reconnaissable d’un episode a l’autre',
+      distinctive: 'chacun porte une piece reconnaissable d’une video a l’autre',
       costume: 'streetwear credible, hoodies, survetements premium, vestes en cuir',
       accessories: 'telephones, cigarettes, canettes, sacs',
       colorCode: 'plus clairs ou plus textures que Vland, pour ne pas se confondre avec lui',
@@ -507,7 +507,7 @@ export const VLAND_UNIVERSE: Universe = {
     },
     {
       name: 'La veste',
-      description: 'une veste oversize precise, portee sur plusieurs episodes consecutifs',
+      description: 'une veste oversize precise, portee sur plusieurs videos consecutifs',
       role: 'marqueur de continuite entre deux scenes enchainees',
     },
   ],
@@ -527,9 +527,8 @@ export const VLAND_UNIVERSE: Universe = {
       ],
       hook: 'Ouvrir sur une obstruction de premier plan qui se degage',
       payoff: 'La derniere image donne envie de voir le plan suivant du clip',
-      cta: '',
       recurring: [
-        'la meme texture VHS d’un episode a l’autre',
+        'la meme texture VHS d’une video a l’autre',
         'entree et sortie toujours motivees par un element de l’image',
       ],
     },
@@ -545,7 +544,6 @@ export const VLAND_UNIVERSE: Universe = {
       ],
       hook: 'Le mouvement est deja lance a la premiere image',
       payoff: 'La seconde de vide apres sa sortie',
-      cta: '',
       recurring: ['un seul plan continu', 'la camera perd le sujet au moins une fois'],
     },
     {
@@ -560,7 +558,6 @@ export const VLAND_UNIVERSE: Universe = {
       ],
       hook: 'Aucun visage connu pendant les premieres secondes',
       payoff: 'On comprend que le rappeur est peut-etre passe par la',
-      cta: '',
       recurring: ['aucun personnage principal', 'la ville comme sujet'],
     },
   ],

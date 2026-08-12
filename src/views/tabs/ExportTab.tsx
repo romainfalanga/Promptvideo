@@ -1,37 +1,37 @@
 import { useMemo, useState } from 'react'
 import type { Project } from '../../types'
 import {
-  exportAccount,
+  exportBible,
   exportDelegationBrief,
   exportJSON,
   exportReferenceManifest,
   exportSeedancePack,
 } from '../../engine/exporter'
 import { auditProject, scorePercent } from '../../engine/audit'
-import { compileEpisode } from '../../engine/prompt'
+import { compileVideo } from '../../engine/prompt'
 import { download, fileize, cx } from '../../lib/utils'
 import { Card, CodeBlock, CopyButton } from '../../components/ui'
 
-type Kind = 'compte' | 'pack' | 'references' | 'delegation' | 'json'
+type Kind = 'bible' | 'pack' | 'references' | 'delegation' | 'json'
 
 const TABS: { id: Kind; label: string; hint: string }[] = [
-  { id: 'compte', label: 'Le Compte', hint: 'Le document complet : artiste, direction artistique, casting, lieux, formats, references, prompts et mode d\'emploi.' },
-  { id: 'pack', label: 'Pack Seedance', hint: 'Version courte : la liste ordonnee des fichiers a joindre, puis un prompt par episode. Rien d\'autre.' },
+  { id: 'bible', label: 'La Bible', hint: 'Le document complet : identite, direction artistique, casting, lieux, formats, references, prompts et mode d\'emploi.' },
+  { id: 'pack', label: 'Pack Seedance', hint: 'Version courte : la liste ordonnee des fichiers a joindre, puis un prompt par video. Rien d\'autre.' },
   { id: 'references', label: 'Manifeste de references', hint: 'Uniquement les references, avec le prompt de fabrication de chacune.' },
-  { id: 'delegation', label: 'Brief a deleguer', hint: 'A coller dans un assistant conversationnel pour faire ecrire de nouveaux episodes dans la meme direction artistique.' },
+  { id: 'delegation', label: 'Brief a deleguer', hint: 'A coller dans un assistant conversationnel pour faire ecrire de nouveaux videos dans la meme direction artistique.' },
   { id: 'json', label: 'JSON du projet', hint: 'Sauvegarde complete, reimportable depuis l\'accueil.' },
 ]
 
 export default function ExportTab({ project }: { project: Project }) {
-  const [kind, setKind] = useState<Kind>('compte')
+  const [kind, setKind] = useState<Kind>('bible')
   const audit = auditProject(project)
   const pct = scorePercent(audit)
   const blocking = audit.issues.filter((i) => i.level === 'bloquant')
 
   const content = useMemo(() => {
     switch (kind) {
-      case 'compte':
-        return exportAccount(project)
+      case 'bible':
+        return exportBible(project)
       case 'pack':
         return exportSeedancePack(project)
       case 'references':
@@ -46,8 +46,8 @@ export default function ExportTab({ project }: { project: Project }) {
   const filename = useMemo(() => {
     const base = fileize(project.name)
     switch (kind) {
-      case 'compte':
-        return `${base}_compte.md`
+      case 'bible':
+        return `${base}_bible.md`
       case 'pack':
         return `${base}_pack_seedance.md`
       case 'references':
@@ -78,7 +78,7 @@ export default function ExportTab({ project }: { project: Project }) {
       )}
 
       <Card
-        title="Exporter le compte"
+        title="Exporter l'univers"
         subtitle={`Completude : ${pct} %. Tout est genere en direct depuis les fiches de l'atelier.`}
         actions={
           <>
@@ -113,13 +113,13 @@ export default function ExportTab({ project }: { project: Project }) {
         <CodeBlock text={content} maxHeight={640} />
       </Card>
 
-      <Card title="Prompts par episode" subtitle="Le raccourci quotidien : un bouton par episode.">
-        {project.episodes.length === 0 ? (
-          <p className="text-[12.5px] text-ink-500">Aucun episode a exporter.</p>
+      <Card title="Prompts par video" subtitle="Le raccourci quotidien : un bouton par video.">
+        {project.videos.length === 0 ? (
+          <p className="text-[12.5px] text-ink-500">Aucune video a exporter.</p>
         ) : (
           <div className="space-y-2">
-            {project.episodes.map((e) => {
-              const c = compileEpisode(project, e)
+            {project.videos.map((e) => {
+              const c = compileVideo(project, e)
               return (
                 <div key={e.id} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-ink-700/70 bg-ink-850/40 px-4 py-3">
                   <div className="min-w-0">
@@ -145,8 +145,8 @@ export default function ExportTab({ project }: { project: Project }) {
             'Produis les references du manifeste avec les prompts de fabrication fournis. Commence par la planche visage de chaque personnage : c\'est elle qui tient l\'identite.',
             'Marque chaque reference comme prete dans l\'onglet References au fur et a mesure.',
             'Ouvre Seedance et joins les fichiers dans l\'ordre exact du manifeste : le premier devient @Image1.',
-            'Colle le prompt de l\'episode, verifie la duree et le format, lance la generation.',
-            'Pour l\'episode suivant, reutilise exactement les memes references : c\'est ce qui rend le compte coherent d\'une video a l\'autre.',
+            'Colle le prompt de l\'video, verifie la duree et le format, lance la generation.',
+            "Pour la video suivante, reutilise exactement les memes references : c'est ce qui rend l'univers coherent d'une video a l'autre.",
           ].map((s, i) => (
             <li key={i} className="flex gap-3">
               <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-amber text-[11px] font-bold text-ink-950">

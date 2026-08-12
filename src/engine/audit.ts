@@ -2,14 +2,14 @@
  * Audit qualite.
  *
  * Deux familles de controles :
- *  - la completude editoriale (est-ce que le compte tient debout ?),
+ *  - la completude editoriale (est-ce que l'univers tient debout ?),
  *  - la conformite technique aux contraintes reelles de Seedance 2.5
  *    (nombre de references, duree, longueur de prompt, ancres d'identite).
  */
 
 import type { AuditIssue, AuditResult, Project } from '../types'
 import { SEEDANCE, countWords, promptWordBudget } from '../data/seedance'
-import { compileEpisode } from './prompt'
+import { compileVideo } from './prompt'
 import { refStats } from './references'
 
 interface Check {
@@ -36,35 +36,35 @@ function isBlank(...values: string[]): boolean {
 const CHECKS: Check[] = [
   /* ---------------- Artiste ---------------- */
   {
-    section: 'Artiste',
+    section: 'Identite',
     weight: 6,
     run: (p) =>
-      isBlank(p.artist.name, p.artist.handle)
-        ? issue('artist.identity', 'bloquant', 'Artiste', 'Identite incomplete', "Le compte n'a pas de nom ou pas de handle.", "Renseigne le nom et le handle dans l'onglet Artiste.")
+      isBlank(p.artist.name)
+        ? issue('artist.identity', 'bloquant', 'Identite', 'Univers sans nom', "L'univers n'a pas de nom.", "Renseigne le nom dans l'onglet Identite.")
         : null,
   },
   {
-    section: 'Artiste',
+    section: 'Identite',
     weight: 6,
     run: (p) =>
-      isBlank(p.artist.mission, p.artist.promise)
-        ? issue('artist.promise', 'important', 'Artiste', 'Promesse floue', "Sans mission ni promesse, les episodes partent dans toutes les directions.", "Ecris en une phrase ce que le compte promet a chaque video.")
+      isBlank(p.artist.mission)
+        ? issue('artist.promise', 'important', 'Identite', 'Intention floue', "Sans intention ecrite, les videos partent dans toutes les directions.", "Ecris en une phrase ce que ces videos cherchent a faire.")
         : null,
   },
   {
-    section: 'Artiste',
+    section: 'Identite',
     weight: 4,
     run: (p) =>
-      isBlank(p.artist.voice, p.artist.audience)
-        ? issue('artist.voice', 'confort', 'Artiste', 'Voix ou audience non definie', "Le ton et la cible orientent l'ecriture des cartons et des dialogues.", "Complete les champs Voix et Audience.")
+      isBlank(p.artist.voice)
+        ? issue('artist.voice', 'confort', 'Identite', 'Ton non defini', "Le ton oriente l'ecriture des textes incrustes et des dialogues.", "Complete le champ Ton.")
         : null,
   },
   {
-    section: 'Artiste',
+    section: 'Identite',
     weight: 4,
     run: (p) =>
       p.artist.taboos.length === 0
-        ? issue('artist.taboos', 'confort', 'Artiste', 'Aucun interdit declare', "Les interdits d'un compte sont ce qui le rend reconnaissable.", "Ajoute au moins un interdit dans l'onglet Artiste.")
+        ? issue('artist.taboos', 'confort', 'Identite', 'Aucun interdit declare', "Les interdits sont ce qui rend un univers reconnaissable.", "Ajoute au moins un interdit dans l'onglet Identite.")
         : null,
   },
 
@@ -116,7 +116,7 @@ const CHECKS: Check[] = [
     weight: 8,
     run: (p) =>
       p.characters.length === 0
-        ? issue('cast.empty', 'bloquant', 'Casting', 'Aucun personnage', "Un compte sans personnage recurrent ne cree pas d'attachement.", "Cree au moins un personnage dans l'onglet Casting.")
+        ? issue('cast.empty', 'bloquant', 'Casting', 'Aucun personnage', "Un univers sans personnage recurrent ne cree pas d'attachement.", "Cree au moins un personnage dans l'onglet Casting.")
         : null,
   },
   {
@@ -147,7 +147,7 @@ const CHECKS: Check[] = [
             'Casting',
             'Trop de personnages principaux',
             `${p.characters.length} personnages : au-dela de ${SEEDANCE.refs.recommendedPrimarySubjects} sujets principaux, les traits se diluent et le modele confond les identites.`,
-            'Reduis le casting principal, ou repartis les personnages sur plusieurs episodes distincts.',
+            'Reduis le casting principal, ou repartis les personnages sur plusieurs videos distinctes.',
           )
         : null,
   },
@@ -192,25 +192,25 @@ const CHECKS: Check[] = [
     },
   },
 
-  /* ---------------- Episodes ---------------- */
+  /* ---------------- Videos ---------------- */
   {
-    section: 'Episodes',
+    section: 'Videos',
     weight: 8,
     run: (p) =>
-      p.episodes.length === 0
-        ? issue('ep.empty', 'bloquant', 'Episodes', 'Aucun episode', "Il n'y a rien a exporter tant qu'aucun episode n'existe.", "Cree un episode dans l'onglet Episodes.")
+      p.videos.length === 0
+        ? issue('ep.empty', 'bloquant', 'Videos', 'Aucune video', "Il n'y a rien a exporter tant qu'aucune video n'existe.", "Cree une video dans l'onglet Videos.")
         : null,
   },
   {
-    section: 'Episodes',
+    section: 'Videos',
     weight: 6,
     run: (p) => {
-      const bad = p.episodes.filter((e) => e.duration < SEEDANCE.duration.min || e.duration > SEEDANCE.duration.max)
+      const bad = p.videos.filter((e) => e.duration < SEEDANCE.duration.min || e.duration > SEEDANCE.duration.max)
       return bad.length
         ? issue(
             'ep.duration',
             'bloquant',
-            'Episodes',
+            'Videos',
             `Duree hors limites (${bad.length})`,
             `${bad.map((e) => `${e.title} : ${e.duration} s`).join(', ')}. Seedance 2.5 accepte ${SEEDANCE.duration.min} a ${SEEDANCE.duration.max} secondes.`,
             `Ramene la duree entre ${SEEDANCE.duration.min} et ${SEEDANCE.duration.max} secondes.`,
@@ -219,52 +219,52 @@ const CHECKS: Check[] = [
     },
   },
   {
-    section: 'Episodes',
+    section: 'Videos',
     weight: 6,
     run: (p) => {
-      const bad = p.episodes.filter((e) => e.shots.length === 0)
+      const bad = p.videos.filter((e) => e.shots.length === 0)
       return bad.length
-        ? issue('ep.noshots', 'bloquant', 'Episodes', `Episodes sans plan (${bad.length})`, `${bad.map((e) => e.title).join(', ')}.`, 'Ajoute au moins un plan par episode.')
+        ? issue('ep.noshots', 'bloquant', 'Videos', `Videos sans plan (${bad.length})`, `${bad.map((e) => e.title).join(', ')}.`, 'Ajoute au moins un plan par video.')
         : null
     },
   },
   {
-    section: 'Episodes',
+    section: 'Videos',
     weight: 5,
     run: (p) => {
-      const bad = p.episodes.filter((e) => e.shots.some((s) => !s.action.trim()))
+      const bad = p.videos.filter((e) => e.shots.some((s) => !s.action.trim()))
       return bad.length
-        ? issue('ep.noaction', 'important', 'Episodes', 'Plans sans action decrite', `${bad.map((e) => e.title).join(', ')} contiennent un plan dont l'action est vide. Seedance a besoin de savoir ce qui CHANGE pendant le plan.`, "Decris l'evenement principal de chaque plan.")
+        ? issue('ep.noaction', 'important', 'Videos', 'Plans sans action decrite', `${bad.map((e) => e.title).join(', ')} contiennent un plan dont l'action est vide. Seedance a besoin de savoir ce qui CHANGE pendant le plan.`, "Decris l'evenement principal de chaque plan.")
         : null
     },
   },
   {
-    section: 'Episodes',
+    section: 'Videos',
     weight: 6,
     run: (p) => {
       const long: string[] = []
       const short: string[] = []
-      for (const e of p.episodes) {
+      for (const e of p.videos) {
         if (!e.shots.length) continue
-        const w = compileEpisode(p, e).bodyWords
+        const w = compileVideo(p, e).bodyWords
         const budget = promptWordBudget(e.shots.length)
         if (w > budget.max) long.push(`${e.title} (${w} mots pour un budget de ${budget.max})`)
         else if (w < budget.min) short.push(`${e.title} (${w} mots)`)
       }
       if (long.length)
-        return issue('ep.toolong', 'important', 'Episodes', 'Prompt trop long', `${long.join(', ')} : au-dela du budget, le modele dilue les consignes.`, 'Raccourcis les descriptions de plan, ou coupe en deux episodes.')
+        return issue('ep.toolong', 'important', 'Videos', 'Prompt trop long', `${long.join(', ')} : au-dela du budget, le modele dilue les consignes.`, 'Raccourcis les descriptions de plan, ou coupe en deux videos.')
       if (short.length)
-        return issue('ep.tooshort', 'confort', 'Episodes', 'Prompt trop court', `${short.join(', ')} : en dessous de ${SEEDANCE.promptWords.min} mots, le modele improvise.`, 'Precise etat initial, evenement et etat final de chaque plan.')
+        return issue('ep.tooshort', 'confort', 'Videos', 'Prompt trop court', `${short.join(', ')} : en dessous de ${SEEDANCE.promptWords.min} mots, le modele improvise.`, 'Precise etat initial, evenement et etat final de chaque plan.')
       return null
     },
   },
   {
-    section: 'Episodes',
+    section: 'Videos',
     weight: 4,
     run: (p) => {
-      const silent = p.episodes.filter((e) => e.shots.every((s) => !s.audio.music && !s.audio.sfx && !s.audio.dialogue))
+      const silent = p.videos.filter((e) => e.shots.every((s) => !s.audio.music && !s.audio.sfx && !s.audio.dialogue))
       return silent.length
-        ? issue('ep.audio', 'important', 'Episodes', `Aucune consigne audio (${silent.length})`, `${silent.map((e) => e.title).join(', ')} : Seedance 2.5 genere du son. Sans consigne, il inventera.`, 'Renseigne au moins la musique ou une ambiance par episode.')
+        ? issue('ep.audio', 'important', 'Videos', `Aucune consigne audio (${silent.length})`, `${silent.map((e) => e.title).join(', ')} : Seedance 2.5 genere du son. Sans consigne, il inventera.`, 'Renseigne au moins la musique ou une ambiance par video.')
         : null
     },
   },
@@ -276,7 +276,7 @@ const CHECKS: Check[] = [
     run: (p) => {
       const s = refStats(p.refs)
       return s.images > SEEDANCE.refs.maxImages
-        ? issue('ref.maximg', 'bloquant', 'References', 'Trop d\'images de reference', `${s.images} images pour un maximum de ${SEEDANCE.refs.maxImages} par generation.`, 'Retire les references secondaires, ou repartis-les entre plusieurs episodes.')
+        ? issue('ref.maximg', 'bloquant', 'References', 'Trop d\'images de reference', `${s.images} images pour un maximum de ${SEEDANCE.refs.maxImages} par generation.`, 'Retire les references secondaires, ou repartis-les entre plusieurs videos.')
         : null
     },
   },
@@ -388,16 +388,16 @@ const CHECKS: Check[] = [
     },
   },
   {
-    section: 'Episodes',
+    section: 'Videos',
     weight: 5,
     run: (p) => {
-      const flat = p.episodes.filter((e) => e.shots.length && e.shots.every((s) => !s.livingDetail.trim()))
+      const flat = p.videos.filter((e) => e.shots.length && e.shots.every((s) => !s.livingDetail.trim()))
       return flat.length
         ? issue(
             'ep.living',
             'important',
-            'Episodes',
-            `Episodes sans element en mouvement (${flat.length})`,
+            'Videos',
+            `Videos sans element en mouvement (${flat.length})`,
             `${flat.map((e) => e.title).join(', ')} : aucun plan ne declare ce qui bouge dans le cadre.`,
             "Renseigne « Ce qui bouge » sur les plans, ou pioche dans la direction artistique.",
           )
@@ -405,16 +405,16 @@ const CHECKS: Check[] = [
     },
   },
   {
-    section: 'Episodes',
+    section: 'Videos',
     weight: 4,
     run: (p) => {
       // Une transition non motivee n'a de sens que sur le dernier plan.
-      const missing = p.episodes.filter((e) => e.shots.length > 1 && e.shots.slice(0, -1).every((s) => !s.transitionOut.trim()))
+      const missing = p.videos.filter((e) => e.shots.length > 1 && e.shots.slice(0, -1).every((s) => !s.transitionOut.trim()))
       return missing.length
         ? issue(
             'ep.transitions',
             'confort',
-            'Episodes',
+            'Videos',
             `Transitions non motivees (${missing.length})`,
             `${missing.map((e) => e.title).join(', ')} : aucune sortie de plan n'est justifiee par un element de l'image.`,
             'Renseigne « Sortie du plan » sur les plans intermediaires.',

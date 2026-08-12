@@ -8,7 +8,7 @@
  * plutot que d'inventer du contenu a la place de l'utilisateur.
  */
 
-import type { Character, Episode, Project, ReferenceSlot, Shot } from '../types'
+import type { Character, Video, Project, ReferenceSlot, Shot } from '../types'
 import {
   DEFAULT_BACKGROUND_LIFE,
   DEFAULT_CROWD_RULES,
@@ -33,9 +33,9 @@ export function migrateShot(s: Partial<Shot>): Shot {
   }
 }
 
-export function migrateEpisode(e: Partial<Episode>): Episode {
+export function migrateVideo(e: Partial<Video>): Video {
   return {
-    ...(e as Episode),
+    ...(e as Video),
     lyrics: str(e.lyrics),
     visualIdea: str(e.visualIdea),
     continuity: str(e.continuity),
@@ -82,7 +82,7 @@ export function migrateProject(p: Project): Project {
       continuityRules: list(d.continuityRules),
     },
     characters: (p.characters ?? []).map(migrateCharacter),
-    episodes: (p.episodes ?? []).map(migrateEpisode),
+    videos: (p.videos ?? []).map(migrateVideo),
     refs: (p.refs ?? []).map(migrateRef),
   }
 }
