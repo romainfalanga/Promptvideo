@@ -164,6 +164,9 @@ function draftCharacter(name: string, brief: string): Character {
     language: 'francais',
     arc: '',
     relations: '',
+    isGroup: false,
+    gaze: '',
+    behaviors: [],
   }
   return {
     id: uid('chr'),

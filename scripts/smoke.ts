@@ -80,3 +80,59 @@ check('3 concepts distincts', new Set(batch.map(c=>c.universeId)).size === 3, ba
 
 console.log(fail === 0 ? '\nTOUT PASSE' : `\n${fail} ECHECS`)
 if (fail) process.exit(1)
+
+/* ---------------- Prereglages d'artiste ---------------- */
+import { ARTIST_PRESETS } from '../src/data/presets'
+import { migrateProject } from '../src/lib/migrate'
+
+for (const preset of ARTIST_PRESETS) {
+  const pr = preset.build()
+  const e = pr.episodes[0]
+  const cc = compileEpisode(pr, e)
+  const au = auditProject(pr)
+  check(`preset ${preset.id} : construit`, pr.characters.length > 0 && pr.places.length > 0 && pr.refs.length > 0)
+  check(`preset ${preset.id} : audit >= 95%`, scorePercent(au) >= 95, `${scorePercent(au)}% — ${au.issues.map(i=>i.title).join(', ')}`)
+  check(`preset ${preset.id} : aucun bloquant`, au.issues.filter(i=>i.level==='bloquant').length === 0)
+  check(`preset ${preset.id} : deterministe`, preset.build().name === pr.name && preset.build().direction.palette.name === pr.direction.palette.name)
+  // Les blocs du socle doivent finir dans le prompt
+  for (const frag of ['Texture imposee', 'Sources de lumiere autorisees', 'Figuration', 'Garde-robe', 'Registre emotionnel', 'Continuite obligatoire', 'Rapport a la camera', 'en mouvement :', 'sortie motivee :', 'arriere-plan :']) {
+    // Insensible a la casse : les clauses de fin de plan sont capitalisees
+    // en debut de phrase par le compilateur.
+    check(`  ${preset.id} prompt contient "${frag}"`, cc.full.toLowerCase().includes(frag.toLowerCase()))
+  }
+  // Le collectif n'a qu'une planche de groupe, pas de fiche visage
+  const crew = pr.characters.find(c => c.isGroup)
+  if (crew) {
+    const crewRefs = pr.refs.filter(r => r.subjectId === crew.id)
+    check(`  ${preset.id} collectif : une seule reference`, crewRefs.length === 1, String(crewRefs.length))
+    check(`  ${preset.id} collectif : planche de groupe`, crewRefs[0].label.includes('groupe'))
+  }
+  // Les photos fournies ne doivent pas etre marquees a generer
+  const provided = pr.refs.filter(r => r.sourceKind === 'photo-fournie')
+  check(`  ${preset.id} photos fournies presentes`, provided.length > 0, String(provided.length))
+  // Negatifs sans doublon
+  check(`  ${preset.id} negatifs sans doublon`, new Set(pr.settings.negatives).size === pr.settings.negatives.length)
+}
+
+/* ---------------- Migration d'un projet ancien ---------------- */
+const legacy: any = generateProject({ seed: 999 })
+delete legacy.direction.textureTraits
+delete legacy.direction.livingElements
+delete legacy.direction.backgroundLife
+delete legacy.characters[0].gaze
+delete legacy.characters[0].isGroup
+delete legacy.episodes[0].lyrics
+delete legacy.episodes[0].shots[0].livingDetail
+delete legacy.refs[0].sourceKind
+const migrated = migrateProject(legacy)
+check('migration : textureTraits rempli', migrated.direction.textureTraits.length > 0)
+check('migration : livingElements rempli', migrated.direction.livingElements.length > 0)
+check('migration : gaze defini', typeof migrated.characters[0].gaze === 'string')
+check('migration : isGroup defini', migrated.characters[0].isGroup === false)
+check('migration : lyrics defini', migrated.episodes[0].lyrics === '')
+check('migration : sourceKind defini', migrated.refs[0].sourceKind === 'a-generer')
+check('migration : projet migre compile', compileEpisode(migrated, migrated.episodes[0]).full.length > 200)
+check('migration : projet migre auditable', scorePercent(auditProject(migrated)) > 0)
+
+console.log(fail === 0 ? '\nTOUT PASSE (final)' : `\n${fail} ECHECS (final)`)
+if (fail) process.exit(1)

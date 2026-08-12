@@ -20,6 +20,22 @@ stocké en `localStorage` et exportable en JSON.
 
 ---
 
+## Les trois points d'entrée
+
+### Artistes — un socle fourni, appliqué tel quel
+
+Quand un artiste fournit sa direction artistique complète, il n'y a rien à tirer au
+sort : le compte s'ouvre déjà écrit, en un clic depuis l'accueil.
+
+**Vland** est le premier préréglage : clip nocturne, texture VHS / mini-DV, jeune
+rappeur contemporain. Il apporte 13 traits de texture cumulés, 22 environnements en
+rotation, 17 micro-actions de figuration, une garde-robe, une politique de regard par
+personnage, des transitions motivées, des règles de continuité, 3 personnages
+récurrents, 6 lieux, 3 formats de 15 s et un épisode pilote exemplaire.
+
+Ses références d'identité sont marquées **photo fournie** : elles ne doivent jamais
+être régénérées, c'est ce qui fixe le visage d'une vidéo à l'autre.
+
 ## Les deux modes
 
 ### Mode Studio — l'outil propose des comptes complets
@@ -76,18 +92,48 @@ Le compilateur et l'audit sont calés sur les contraintes réelles du modèle
 - **Syntaxe audio** : `( musique )`, `< effet sonore >`, `{ dialogue }`, `【 texte incrusté 】`.
 - **Multi-plans** : étapes timecodées `[0:00–0:05] PLAN LARGE — …`.
 
+### Les blocs détaillés de direction artistique
+
+Une rubrique par phrase ne suffit pas à tenir une identité visuelle. La direction
+artistique porte donc des **réservoirs** dans lesquels l'écriture pioche, tous injectés
+automatiquement dans les prompts :
+
+| Bloc | Ce qu'il empêche |
+|---|---|
+| Traits de texture (cumulables) | Un seul mot-clé « VHS » ne produit pas un rendu analogique |
+| Moments privilégiés / écartés | Le modèle place la scène en plein jour |
+| Sources de lumière autorisées | Un éclairage de studio invisible dans le réel |
+| Mouvements de caméra | Une caméra différente à chaque vidéo |
+| Stratégies de composition | Le sujet toujours centré |
+| Ce qui bouge | L'effet « photo animée » |
+| Vie de fond + règles de figuration | Des figurants plantés qui fixent l'objectif |
+| Garde-robe + règles | Le cliché vestimentaire |
+| Registre émotionnel | Une image jolie mais sans intention |
+| Transitions motivées | Des coupes arbitraires |
+| Réservoir d'environnements | Deux fois le même décor |
+| Règles de continuité | Le personnage qui change entre deux épisodes |
+
+Chaque plan porte en plus sa **vie de fond**, son **élément en mouvement** et sa
+**sortie motivée** ; chaque épisode porte ses **paroles**, son **idée visuelle** et sa
+**continuité** avec le précédent.
+
 ### Cohérence entre les vidéos
 
-Deux mécanismes, parce que c'est là que les comptes IA s'effondrent d'habitude :
+Trois mécanismes, parce que c'est là que les comptes IA s'effondrent d'habitude :
 
 1. **L'ancre d'identité** — un descripteur canonique compact par personnage
    (âge, morphologie, visage, cheveux, peau, yeux, signe distinctif, costume),
    réinjecté dans **chaque** prompt où il apparaît. L'audit refuse une ancre de
    moins de 12 mots.
-2. **Le manifeste de références** — pour chaque personnage une planche visage et une
+2. **La politique de regard** — un champ par personnage. Sans consigne explicite, le
+   modèle fait poser le sujet face objectif ; c'est le premier réflexe à désamorcer sur
+   un compte qui veut avoir l'air pris sur le vif.
+3. **Le manifeste de références** — pour chaque personnage une planche visage et une
    planche costume, pour chaque lieu une plaque de décor vide, plus une planche de
-   style pour tout le compte. Chaque slot est livré avec le prompt qui permet de
-   fabriquer l'image.
+   style pour tout le compte. Un personnage marqué *collectif* reçoit une planche de
+   groupe au lieu de trois fiches d'identité. Chaque slot est livré avec le prompt qui
+   permet de fabriquer l'image — sauf les photos fournies par l'artiste, signalées
+   comme telles pour ne jamais être régénérées.
 
 ---
 
@@ -125,7 +171,11 @@ src/
   data/
     seedance.ts        contraintes et grammaire du modèle
     library.ts         types et réservoirs transverses
-    universes.*.ts     les neuf univers (palettes, castings, lieux, formats)
+    universes.*.ts     les univers (palettes, castings, lieux, formats)
+    universes.vland.ts le socle de direction artistique de Vland
+    presets.ts         les préréglages d'artiste, déjà écrits
+  lib/
+    migrate.ts         complète les projets enregistrés avant un ajout de champ
   engine/
     generate.ts        mode Studio — génération déterministe
     interpret.ts       mode Sur-Mesure — texte libre → projet

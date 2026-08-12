@@ -78,6 +78,18 @@ function anchorsOf(project: Project, shots: Shot[]): string[] {
 }
 
 /**
+ * Politique de regard. Sans consigne explicite, le modele fait poser les
+ * sujets face objectif : c'est le premier reflexe a desamorcer sur un
+ * compte qui veut avoir l'air pris sur le vif.
+ */
+function gazeOf(project: Project, shots: Shot[]): string[] {
+  const ids = new Set(shots.flatMap((s) => s.characterIds))
+  return project.characters
+    .filter((c) => ids.has(c.id) && c.gaze.trim())
+    .map((c) => `${c.name.toUpperCase()} : ${c.gaze}`)
+}
+
+/**
  * Une ligne de plan. Le decor n'est decrit en entier qu'a sa premiere
  * apparition : le repeter a chaque plan gonfle le prompt sans rien apporter,
  * et dilue les 20-30 premiers mots qui portent le plus de poids.
@@ -110,6 +122,9 @@ function shotLine(project: Project, shot: Shot, withTimecode: boolean, placesSee
     shot.initialState ? `au depart : ${shot.initialState}` : '',
     shot.endState ? `a la fin : ${shot.endState}` : '',
     props.length ? `objet visible : ${props.join(' et ')}` : '',
+    shot.backgroundAction ? `arriere-plan : ${shot.backgroundAction}` : '',
+    shot.livingDetail ? `en mouvement : ${shot.livingDetail}` : '',
+    shot.transitionOut ? `sortie motivee : ${shot.transitionOut}` : '',
   ].filter(Boolean)
 
   const tc = withTimecode ? `[${formatTimecode(shot.start)}–${formatTimecode(shot.end)}] ` : ''
@@ -146,28 +161,57 @@ function audioLine(project: Project, shots: Shot[]): string {
 /* Compilation                                                         */
 /* ------------------------------------------------------------------ */
 
+/**
+ * Bloc style. Il porte tout ce qui ne doit jamais changer d'une video a
+ * l'autre : c'est lui qui fait qu'un compte a une texture reconnaissable.
+ */
 function styleFooter(project: Project, shots: Shot[]): string {
   const d = project.direction
   const place = shots.map((s) => s.placeId).find(Boolean)
   const placeObj = place ? project.places.find((p) => p.id === place) : null
+  const withPeople = shots.some((s) => s.characterIds.length) || shots.some((s) => s.backgroundAction)
 
   const lines = [
-    `Style : ${join([d.genre, d.lighting, d.texture, d.colorGrade], ', ')}.`,
+    `Style : ${join([d.genre, d.lighting, d.colorGrade], ', ')}.`,
+    // Les traits de texture sont enumeres un par un : c'est leur cumul qui
+    // produit le rendu analogique, pas un mot-cle unique.
+    d.textureTraits.length ? `Texture imposee : ${d.textureTraits.join(' ; ')}.` : `Texture : ${d.texture}.`,
     `Palette imposee : ${d.palette.name} — ${d.palette.colors.join(', ')}. ${d.palette.note}`,
+    d.lightSources.length ? `Sources de lumiere autorisees, a l'exclusion de toute autre : ${d.lightSources.join(', ')}.` : '',
+    d.preferredTimes.length ? `Moment : ${d.preferredTimes[0]}.` : '',
     `Grammaire camera : ${d.cameraGrammar}. Composition : ${d.composition}.`,
+    withPeople && d.crowdRules.length ? `Figuration : ${d.crowdRules.join(' ; ')}.` : '',
+    d.wardrobe.length ? `Garde-robe : ${d.wardrobe.slice(0, 8).join(', ')}. ${d.wardrobeRules.join(' ; ')}` : '',
+    d.emotionalRegister.length ? `Registre emotionnel : ${d.emotionalRegister.join(', ')}.` : '',
     placeObj?.soundscape ? `Ambiance sonore du lieu : ${placeObj.soundscape}.` : '',
   ]
   return lines.filter(Boolean).join('\n')
 }
 
 function constraintsFooter(project: Project, episode: Episode): string {
+  const d = project.direction
   const negatives = project.settings.negatives.filter(Boolean)
   const lines = [
     `Parametres : duree ${episode.duration} s, format ${episode.aspect}, resolution ${episode.resolution}${
       episode.cameraFixed ? ', camera verrouillee' : ''
     }${episode.seed ? `, seed ${episode.seed}` : ''}.`,
+    d.avoidedTimes.length ? `Moments ecartes : ${d.avoidedTimes.join(' ; ')}.` : '',
     negatives.length ? `A eviter absolument : ${negatives.join(' ; ')}.` : '',
-    project.direction.motto ? `Regle d'or : ${project.direction.motto}` : '',
+    d.motto ? `Regle d'or : ${d.motto}` : '',
+  ]
+  return lines.filter(Boolean).join('\n')
+}
+
+/**
+ * Bloc de continuite. Il n'a de sens que sur un compte qui raconte la meme
+ * histoire d'un episode a l'autre : on rappelle alors ce qui doit rester
+ * rigoureusement identique.
+ */
+function continuityBlock(project: Project, episode: Episode): string {
+  const rules = project.direction.continuityRules.filter(Boolean)
+  const lines = [
+    rules.length ? `Continuite obligatoire d'un episode a l'autre : ${rules.join(' ; ')}.` : '',
+    episode.continuity ? `Continuite propre a cet episode : ${episode.continuity}` : '',
   ]
   return lines.filter(Boolean).join('\n')
 }
@@ -186,9 +230,11 @@ export function compileEpisode(project: Project, episode: Episode): CompiledProm
 
   const declarations = attachments.map(refDeclaration).join(' ')
   const anchors = anchorsOf(project, shots)
+  const gazes = gazeOf(project, shots)
   const anchorLine = anchors.length
     ? `Identites a respecter a l'identique dans tous les plans — ${anchors.join(' | ')}.`
     : ''
+  const gazeLine = gazes.length ? `Rapport a la camera — ${gazes.join(' | ')}.` : ''
 
   const multi = shots.length > 1
   const placesSeen = new Set<string>()
@@ -196,10 +242,23 @@ export function compileEpisode(project: Project, episode: Episode): CompiledProm
 
   // Le corps narratif est ce qui doit peser 60 a 100 mots. Les ancres
   // d'identite sont un rappel technique : elles sont comptees a part.
-  const narrative = [episode.logline ? sentence(episode.logline) : '', ...shotLines].filter(Boolean).join('\n')
-  const body = [narrative, anchorLine].filter(Boolean).join('\n')
+  // L'idee visuelle passe avant la logline : c'est elle qui doit orienter
+  // la generation, pas le resume du format.
+  const narrative = [
+    episode.visualIdea ? sentence(episode.visualIdea) : '',
+    episode.logline ? sentence(episode.logline) : '',
+    ...shotLines,
+  ]
+    .filter(Boolean)
+    .join('\n')
+  const body = [narrative, anchorLine, gazeLine].filter(Boolean).join('\n')
 
-  const footer = [styleFooter(project, shots), audioLine(project, shots), constraintsFooter(project, episode)]
+  const footer = [
+    styleFooter(project, shots),
+    audioLine(project, shots),
+    continuityBlock(project, episode),
+    constraintsFooter(project, episode),
+  ]
     .filter(Boolean)
     .join('\n')
 
@@ -223,14 +282,20 @@ export function compileShot(project: Project, episode: Episode, shot: Shot): Com
   const anchors = anchorsOf(project, [shot])
   const duration = Math.max(4, Math.min(30, shot.end - shot.start || 5))
 
+  const gazes = gazeOf(project, [shot])
   const narrative = [shotLine(project, shot, false, new Set()), shot.styleNote].filter(Boolean).join('\n')
-  const body = [narrative, anchors.length ? `Identite a respecter — ${anchors.join(' | ')}.` : '']
+  const body = [
+    narrative,
+    anchors.length ? `Identite a respecter — ${anchors.join(' | ')}.` : '',
+    gazes.length ? `Rapport a la camera — ${gazes.join(' | ')}.` : '',
+  ]
     .filter(Boolean)
     .join('\n')
 
   const footer = [
     styleFooter(project, [shot]),
     audioLine(project, [shot]),
+    continuityBlock(project, episode),
     `Parametres : duree ${duration} s, format ${episode.aspect}, resolution ${episode.resolution}${
       episode.cameraFixed ? ', camera verrouillee' : ''
     }.`,

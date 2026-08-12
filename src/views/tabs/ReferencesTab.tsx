@@ -64,6 +64,11 @@ export default function ReferencesTab({ project }: { project: Project }) {
                 <div>
                   <h3 className="text-[14.5px] text-ink-100">{r.label}</h3>
                   <p className="font-mono text-[11.5px] text-ink-500">{r.filename}</p>
+                  {r.sourceKind === 'photo-fournie' && (
+                    <span className="mt-1 inline-block rounded-full border border-signal-info/40 px-2 py-0.5 text-[10.5px] text-signal-info">
+                      photo fournie — ne pas regenerer
+                    </span>
+                  )}
                 </div>
               </div>
               <div className="flex items-center gap-1">
@@ -129,6 +134,12 @@ export default function ReferencesTab({ project }: { project: Project }) {
                   checked={r.primary}
                   onChange={(v) => patch(r.id, (x) => { x.primary = v })}
                   hint={`Compte dans la limite des ${SEEDANCE.refs.recommendedPrimarySubjects} sujets principaux.`}
+                />
+                <Toggle
+                  label="Photo fournie par l'artiste"
+                  checked={r.sourceKind === 'photo-fournie'}
+                  onChange={(v) => patch(r.id, (x) => { x.sourceKind = v ? 'photo-fournie' : 'a-generer' })}
+                  hint="A cocher pour une photo reelle : elle ne doit jamais etre regeneree, c'est elle qui fixe le visage."
                 />
                 <p className="text-[11.5px] leading-relaxed text-ink-500">{r.howTo}</p>
               </div>

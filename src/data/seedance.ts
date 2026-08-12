@@ -153,12 +153,17 @@ export function countWords(text: string): number {
  * multi-plans decrit plusieurs etapes : chaque etape supplementaire a
  * legitimement besoin de sa propre ligne, sinon on perd la description de
  * ce qui change. Le budget grandit donc avec le nombre de plans.
+ *
+ * Increment : une ligne de plan complete pese environ 55 a 70 mots (sujet,
+ * action, lieu, etats, vie de fond, element en mouvement, transition,
+ * camera). Le plafond accorde donc une ligne pleine par plan supplementaire ;
+ * la cible confortable en accorde une un peu plus serree.
  */
 export function promptWordBudget(shotCount: number): { min: number; sweet: number; max: number } {
   const extra = Math.max(0, shotCount - 1)
   return {
     min: SEEDANCE.promptWords.min,
-    sweet: SEEDANCE.promptWords.sweetMax + extra * 30,
-    max: SEEDANCE.promptWords.max + extra * 40,
+    sweet: SEEDANCE.promptWords.sweetMax + extra * 40,
+    max: SEEDANCE.promptWords.max + extra * 55,
   }
 }

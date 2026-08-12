@@ -45,6 +45,9 @@ function blankShot(start: number, end: number, lens: string): Shot {
     action: '',
     endState: '',
     styleNote: '',
+    backgroundAction: '',
+    livingDetail: '',
+    transitionOut: '',
     audio: { music: '', sfx: '', dialogue: '', subtitle: '' },
     refIds: [],
     notes: '',
@@ -75,6 +78,9 @@ export default function EpisodesTab({ project }: { project: Project }) {
         title: f ? `${f.name} — episode ${d.episodes.length + 1}` : `Episode ${d.episodes.length + 1}`,
         formatId: f?.id ?? null,
         logline: f?.pitch ?? '',
+        lyrics: '',
+        visualIdea: '',
+        continuity: d.direction.continuityRules[0] ?? '',
         duration,
         aspect: d.settings.aspect,
         resolution: d.settings.resolution,
@@ -186,7 +192,34 @@ function EpisodeSheet({ project, episode, onDelete }: { project: Project; episod
       >
         <div className="space-y-4">
           <Field label="Titre" value={episode.title} onChange={(v) => patch((e) => { e.title = v })} />
-          <Area label="Logline" value={episode.logline} onChange={(v) => patch((e) => { e.logline = v })} rows={2} hint="Premiere phrase du prompt : elle porte le plus de poids." />
+
+          <Grid cols={2}>
+            <Area
+              label="Paroles de ce passage"
+              value={episode.lyrics}
+              onChange={(v) => patch((e) => { e.lyrics = v })}
+              rows={4}
+              placeholder="Colle ici les lignes du morceau sur lesquelles cette scene tombe."
+              hint="Matiere premiere du scenario. Non envoyee au modele : c'est l'idee visuelle qui l'est."
+            />
+            <Area
+              label="Idee visuelle"
+              value={episode.visualIdea}
+              onChange={(v) => patch((e) => { e.visualIdea = v })}
+              rows={4}
+              placeholder="La metaphore ou la situation inattendue que cherche cette scene."
+              hint="Placee en tete du prompt : c'est elle qui oriente la generation."
+            />
+          </Grid>
+
+          <Area label="Logline" value={episode.logline} onChange={(v) => patch((e) => { e.logline = v })} rows={2} hint="Deuxieme phrase du prompt." />
+          <Area
+            label="Continuite avec l'episode precedent"
+            value={episode.continuity}
+            onChange={(v) => patch((e) => { e.continuity = v })}
+            rows={2}
+            placeholder="ex. meme tenue, la scene est censee suivre immediatement"
+          />
 
           <Grid cols={3}>
             <NumberField
@@ -379,6 +412,48 @@ function Timeline({ episode }: { episode: Episode }) {
   )
 }
 
+/**
+ * Champ libre adosse a un reservoir de la direction artistique.
+ *
+ * Piocher est plus rapide que taper, et garantit qu'un plan reprend le
+ * vocabulaire du socle ; le champ reste libre pour tout ce que le socle
+ * n'avait pas prevu.
+ */
+function PickField({
+  label,
+  value,
+  options,
+  onChange,
+  hint,
+}: {
+  label: string
+  value: string
+  options: string[]
+  onChange: (v: string) => void
+  hint?: string
+}) {
+  const pool = options.filter((o) => o && o !== value)
+  return (
+    <div>
+      <div className="flex items-center justify-between gap-2">
+        <span className="label">{label}</span>
+        {pool.length > 0 && (
+          <button
+            type="button"
+            className="btn-quiet -mt-1 px-2 py-0.5 text-[11px]"
+            onClick={() => onChange(pool[Math.floor(Math.random() * pool.length)])}
+            title="Piocher dans la direction artistique"
+          >
+            ↻ piocher
+          </button>
+        )}
+      </div>
+      <input className="input" value={value} onChange={(e) => onChange(e.target.value)} placeholder="—" />
+      {hint && <span className="mt-1 block text-[11px] text-ink-500">{hint}</span>}
+    </div>
+  )
+}
+
 function ShotRow({
   project,
   episode,
@@ -544,7 +619,43 @@ function ShotRow({
             </div>
           </div>
 
-          <Area label="Note de style pour ce plan" value={shot.styleNote} onChange={(v) => set('styleNote', v)} rows={2} />
+          <div>
+            <span className="label">Vie du plan</span>
+            <div className="grid gap-3 md:grid-cols-3">
+              <PickField
+                label="Vie de fond"
+                value={shot.backgroundAction}
+                options={project.direction.backgroundLife}
+                onChange={(v) => set('backgroundAction', v)}
+                hint="Ce que font les autres personnes."
+              />
+              <PickField
+                label="Ce qui bouge"
+                value={shot.livingDetail}
+                options={project.direction.livingElements}
+                onChange={(v) => set('livingDetail', v)}
+                hint="Evite l'effet photo animee."
+              />
+              <PickField
+                label="Sortie du plan"
+                value={shot.transitionOut}
+                options={project.direction.transitionTriggers}
+                onChange={(v) => set('transitionOut', v)}
+                hint="La transition doit etre motivee par l'image."
+              />
+            </div>
+          </div>
+
+          <div className="grid gap-3 md:grid-cols-2">
+            <PickField
+              label="Composition"
+              value={shot.styleNote}
+              options={project.direction.compositionRules}
+              onChange={(v) => set('styleNote', v)}
+              hint="Strategie de cadrage pour ce plan."
+            />
+            <Field label="Notes de production" value={shot.notes} onChange={(v) => set('notes', v)} />
+          </div>
         </div>
       )}
     </div>

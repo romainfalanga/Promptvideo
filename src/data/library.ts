@@ -62,7 +62,32 @@ export interface FormatSeed {
   recurring: string[]
 }
 
-export interface Universe {
+/**
+ * Blocs detailles de direction artistique.
+ *
+ * Optionnels au niveau de l'univers : les univers generiques se contentent
+ * des reservoirs communs ci-dessous, un socle d'artiste ecrit a la main les
+ * remplit entierement.
+ */
+export interface UniverseExtras {
+  textureTraits?: string[]
+  preferredTimes?: string[]
+  avoidedTimes?: string[]
+  lightSources?: string[]
+  cameraMoves?: string[]
+  compositionRules?: string[]
+  livingElements?: string[]
+  backgroundLife?: string[]
+  crowdRules?: string[]
+  wardrobe?: string[]
+  wardrobeRules?: string[]
+  emotionalRegister?: string[]
+  transitionTriggers?: string[]
+  environmentPool?: string[]
+  continuityRules?: string[]
+}
+
+export interface Universe extends UniverseExtras {
   id: string
   name: string
   emoji: string
@@ -163,6 +188,49 @@ export const VALUE_WORDS = [
   'gout du risque',
   'economie de moyens',
 ]
+
+/* ------------------------------------------------------------------ */
+/* Reservoirs par defaut des blocs detailles                           */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Ce qui doit bouger dans un plan, meme calme. Sans cette consigne,
+ * Seedance produit une photo animee : le sujet respire et rien d'autre.
+ */
+export const DEFAULT_LIVING_ELEMENTS = [
+  'le vent dans les vetements',
+  'une meche de cheveux qui bouge',
+  'de la circulation au loin',
+  'une personne qui traverse le fond du cadre',
+  'la lumiere qui change lentement',
+  'de la vapeur ou de la fumee qui monte',
+  'un reflet qui se deplace',
+]
+
+export const DEFAULT_BACKGROUND_LIFE = [
+  "quelqu'un consulte son telephone",
+  'deux personnes discutent sans se soucier de la camera',
+  "quelqu'un traverse le cadre au premier plan",
+  "quelqu'un ajuste sa veste",
+  "quelqu'un s'assoit un peu plus loin",
+  "quelqu'un regarde ailleurs, ailleurs que vers l'objectif",
+]
+
+export const DEFAULT_CROWD_RULES = [
+  'personne ne regarde jamais la camera',
+  'aucun figurant immobile : chacun a une action en cours',
+  "la scene continue d'exister quand le sujet principal en sort",
+]
+
+export const DEFAULT_TRANSITION_TRIGGERS = [
+  'un passage devant l’objectif',
+  'un changement de direction du sujet',
+  'une porte qui s’ouvre ou se ferme',
+  'un balayage de lumiere',
+  'un regard vers le hors-champ',
+]
+
+export const DEFAULT_EMOTIONAL_REGISTER = ['presence', 'retenue', 'attention']
 
 export const PLATFORM_PRESETS = {
   tiktok: { aspect: '9:16', duration: 12, label: 'TikTok' },

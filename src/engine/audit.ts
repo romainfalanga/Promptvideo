@@ -339,6 +339,90 @@ const CHECKS: Check[] = [
     },
   },
 
+  /* ---------------- Vie de l'image ---------------- */
+  {
+    section: 'Direction',
+    weight: 5,
+    run: (p) =>
+      p.direction.livingElements.length === 0
+        ? issue(
+            'da.living',
+            'important',
+            'Direction',
+            'Rien ne bouge',
+            "Aucun element en mouvement declare : Seedance produira une photo animee ou seul le sujet respire.",
+            "Liste ce qui doit bouger dans un plan (vent, passants, lumiere, fumee) dans l'onglet Direction.",
+          )
+        : null,
+  },
+  {
+    section: 'Direction',
+    weight: 4,
+    run: (p) =>
+      p.direction.backgroundLife.length === 0
+        ? issue(
+            'da.background',
+            'confort',
+            'Direction',
+            'Aucune vie de fond',
+            'Sans micro-actions declarees, la figuration reste plantee et regarde la camera.',
+            "Ajoute des micro-actions de figuration dans l'onglet Direction.",
+          )
+        : null,
+  },
+  {
+    section: 'Casting',
+    weight: 6,
+    run: (p) => {
+      const noGaze = p.characters.filter((c) => !c.gaze.trim())
+      return noGaze.length
+        ? issue(
+            'cast.gaze',
+            'important',
+            'Casting',
+            `Rapport a la camera non defini (${noGaze.length})`,
+            `${noGaze.map((c) => c.name).join(', ')} : sans consigne de regard, le modele fait poser le sujet face objectif.`,
+            "Renseigne le champ « Rapport a la camera » de chaque fiche personnage.",
+          )
+        : null
+    },
+  },
+  {
+    section: 'Episodes',
+    weight: 5,
+    run: (p) => {
+      const flat = p.episodes.filter((e) => e.shots.length && e.shots.every((s) => !s.livingDetail.trim()))
+      return flat.length
+        ? issue(
+            'ep.living',
+            'important',
+            'Episodes',
+            `Episodes sans element en mouvement (${flat.length})`,
+            `${flat.map((e) => e.title).join(', ')} : aucun plan ne declare ce qui bouge dans le cadre.`,
+            "Renseigne « Ce qui bouge » sur les plans, ou pioche dans la direction artistique.",
+          )
+        : null
+    },
+  },
+  {
+    section: 'Episodes',
+    weight: 4,
+    run: (p) => {
+      // Une transition non motivee n'a de sens que sur le dernier plan.
+      const missing = p.episodes.filter((e) => e.shots.length > 1 && e.shots.slice(0, -1).every((s) => !s.transitionOut.trim()))
+      return missing.length
+        ? issue(
+            'ep.transitions',
+            'confort',
+            'Episodes',
+            `Transitions non motivees (${missing.length})`,
+            `${missing.map((e) => e.title).join(', ')} : aucune sortie de plan n'est justifiee par un element de l'image.`,
+            'Renseigne « Sortie du plan » sur les plans intermediaires.',
+          )
+        : null
+    },
+  },
+
   /* ---------------- Reglages ---------------- */
   {
     section: 'Reglages',

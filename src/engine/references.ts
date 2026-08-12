@@ -143,7 +143,7 @@ export function buildReferences(project: Project, previous: ReferenceSlot[] = []
   const push = (s: Omit<ReferenceSlot, 'id'>) => {
     const key = `${s.subjectType}:${s.subjectId ?? ''}:${s.label}`
     const old = carry.get(key)
-    out.push(old ? { ...old, ...s, id: old.id, url: old.url, status: old.status } : slot(s))
+    out.push(old ? { ...old, ...s, id: old.id, url: old.url, status: old.status, sourceKind: old.sourceKind } : slot(s))
   }
 
   // 1. Style
@@ -159,12 +159,50 @@ export function buildReferences(project: Project, previous: ReferenceSlot[] = []
     aspect: project.settings.aspect,
     filename: `${fileize(project.name)}_style.png`,
     status: 'a-produire',
+    sourceKind: 'a-generer',
     url: '',
     primary: false,
   })
 
   // 2. Personnages
   for (const c of project.characters) {
+    // Un collectif n'a pas de visage : une planche de groupe suffit, et
+    // trois planches d'identite pour un groupe saturent inutilement la
+    // limite des sujets principaux.
+    if (c.isGroup) {
+      push({
+        kind: 'image',
+        label: `${c.name} — planche de groupe`,
+        subjectType: 'character',
+        subjectId: c.id,
+        defines: `la composition du groupe, les silhouettes, les tenues et la maniere dont ils occupent l'espace`,
+        exclude: "le decor, la pose et le cadrage de cette image",
+        howTo:
+          'Plan de groupe en pied, tous visibles, fond neutre ou repérage reel. Chaque membre doit rester distinguable d\'un episode a l\'autre.',
+        genPrompt: join(
+          [
+            `Planche de reference de groupe, plusieurs personnes en pied, fond neutre`,
+            c.name,
+            c.build,
+            c.costume,
+            c.accessories,
+            c.colorCode,
+            `chacun distinct des autres par sa silhouette et sa tenue, aucune uniformite`,
+            `eclairage egal, aucune ombre dure, aucun regard camera`,
+            `${project.direction.palette.name.toLowerCase()} (${project.direction.palette.colors.join(', ')})`,
+          ],
+          ', ',
+        ),
+        aspect: '16:9',
+        filename: `${fileize(project.name)}_${fileize(c.name)}_groupe.png`,
+        status: 'a-produire',
+        sourceKind: 'a-generer',
+        url: '',
+        primary: false,
+      })
+      continue
+    }
+
     for (const t of CHARACTER_REF_TYPES) {
       push({
         kind: 'image',
@@ -183,6 +221,7 @@ export function buildReferences(project: Project, previous: ReferenceSlot[] = []
         aspect: t.aspect,
         filename: `${fileize(project.name)}_${fileize(c.name)}_${t.key}.png`,
         status: 'a-produire',
+        sourceKind: 'a-generer',
         url: '',
         primary: t.primary,
       })
@@ -207,6 +246,7 @@ export function buildReferences(project: Project, previous: ReferenceSlot[] = []
         aspect: t.aspect,
         filename: `${fileize(project.name)}_${fileize(p.name)}_${t.key}.png`,
         status: 'a-produire',
+        sourceKind: 'a-generer',
         url: '',
         primary: t.primary,
       })
@@ -236,6 +276,7 @@ export function buildReferences(project: Project, previous: ReferenceSlot[] = []
       aspect: '1:1',
       filename: `${fileize(project.name)}_${fileize(pr.name)}_objet.png`,
       status: 'a-produire',
+      sourceKind: 'a-generer',
       url: '',
       primary: false,
     })

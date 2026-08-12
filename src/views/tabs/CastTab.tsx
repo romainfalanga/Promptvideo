@@ -4,7 +4,7 @@ import { rebuildRefs, updateProject } from '../../store'
 import { getUniverse } from '../../data/universes'
 import { countWords } from '../../data/seedance'
 import { cx, join, makeRng, randomSeed, uid } from '../../lib/utils'
-import { Area, Card, ConfirmButton, CopyButton, Empty, Field, Grid } from '../../components/ui'
+import { Area, Card, ConfirmButton, CopyButton, Empty, Field, Grid, ListEditor } from '../../components/ui'
 
 const EMPTY: Omit<Character, 'id'> = {
   name: 'Nouveau personnage',
@@ -26,6 +26,9 @@ const EMPTY: Omit<Character, 'id'> = {
   language: 'francais',
   arc: '',
   relations: '',
+  isGroup: false,
+  gaze: '',
+  behaviors: [],
   anchor: '',
 }
 
@@ -80,6 +83,9 @@ export default function CastTab({ project }: { project: Project }) {
         language: 'francais',
         arc: s.arc,
         relations: '',
+        isGroup: false,
+        gaze: '',
+        behaviors: [],
         anchor: '',
       }
       c.anchor = computeAnchor(c)
@@ -217,12 +223,38 @@ function CharacterSheet({
       </Grid>
 
       <Grid cols={2}>
+        <Card
+          title="Jeu et rapport a la camera"
+          subtitle="Sans consigne de regard, le modele fait poser le sujet face objectif : c'est le premier reflexe a desamorcer."
+        >
+          <div className="space-y-3">
+            <Area
+              label="Rapport a la camera"
+              value={c.gaze}
+              onChange={(v) => set('gaze', v)}
+              rows={3}
+              placeholder="ex. ne regarde presque jamais l'objectif ; un seul regard camera autorise par episode"
+              hint="Recopie dans chaque prompt ou ce personnage apparait."
+            />
+            <ListEditor
+              label="Actions credibles"
+              items={c.behaviors}
+              onChange={(v) => set('behaviors', v)}
+              placeholder="ex. observe une situation sans y participer"
+            />
+          </div>
+        </Card>
+
         <Card title="Narration">
           <div className="space-y-3">
             <Area label="Arc sur la saison" value={c.arc} onChange={(v) => set('arc', v)} rows={3} />
             <Area label="Relations" value={c.relations} onChange={(v) => set('relations', v)} rows={2} />
           </div>
         </Card>
+      </Grid>
+
+      <Grid cols={2}>
+        <div />
 
         <Card
           title="Ancre d'identite"

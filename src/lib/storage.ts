@@ -1,4 +1,5 @@
 import type { Project } from '../types'
+import { migrateProject } from './migrate'
 
 const KEY = 'promptvideo.studio.v1'
 
@@ -15,7 +16,7 @@ export function load(): Persisted {
     if (!raw) return EMPTY
     const parsed = JSON.parse(raw) as Persisted
     if (!parsed || !Array.isArray(parsed.projects)) return EMPTY
-    return { projects: parsed.projects, activeId: parsed.activeId ?? null }
+    return { projects: parsed.projects.map(migrateProject), activeId: parsed.activeId ?? null }
   } catch {
     return EMPTY
   }

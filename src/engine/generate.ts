@@ -21,9 +21,20 @@ import type {
   Shot,
 } from '../types'
 import type { CharacterSeed, PlaceSeed, PropSeed, FormatSeed, Universe } from '../data/library'
-import { CADENCES, COMPOSITIONS, HOOK_SHAPES, PLATFORM_PRESETS, RHYTHMS } from '../data/library'
+import {
+  CADENCES,
+  COMPOSITIONS,
+  DEFAULT_BACKGROUND_LIFE,
+  DEFAULT_CROWD_RULES,
+  DEFAULT_EMOTIONAL_REGISTER,
+  DEFAULT_LIVING_ELEMENTS,
+  DEFAULT_TRANSITION_TRIGGERS,
+  HOOK_SHAPES,
+  PLATFORM_PRESETS,
+  RHYTHMS,
+} from '../data/library'
 import { UNIVERSES, getUniverse } from '../data/universes'
-import { BASE_NEGATIVES, SEEDANCE } from '../data/seedance'
+import { BASE_NEGATIVES, CAMERA_MOVES, SEEDANCE } from '../data/seedance'
 import { handleize, join, makeRng, randomSeed, uid, type Rng } from '../lib/utils'
 import { buildReferences } from './references'
 
@@ -82,22 +93,42 @@ function buildArtist(rng: Rng, u: Universe, name: string): Artist {
   }
 }
 
-function buildDirection(rng: Rng, u: Universe): ArtDirection {
+export function buildDirection(rng: Rng, u: Universe): ArtDirection {
+  const texture = rng.pick(u.textures)
   return {
     pitch: u.pitch,
     genre: rng.pick(u.genres),
     palette: rng.pick(u.palettes),
     lighting: rng.pick(u.lightings),
-    texture: rng.pick(u.textures),
+    texture,
     lensKit: rng.pick(u.lensKits),
     cameraGrammar: rng.pick(u.cameraGrammars),
-    composition: rng.pick(COMPOSITIONS),
+    composition: u.compositionRules?.length ? rng.pick(u.compositionRules) : rng.pick(COMPOSITIONS),
     rhythm: rng.pick(RHYTHMS),
     colorGrade: rng.pick(u.grades),
     soundSignature: rng.pick(u.soundSignatures),
     motto: rng.pick(u.mottos),
     doList: [...u.doList],
     dontList: [...u.dontList],
+
+    // Blocs detailles : un univers qui ne les precise pas herite des
+    // reservoirs communs, pour que chaque prompt ait quand meme une
+    // consigne de vie de fond et de mouvement.
+    textureTraits: u.textureTraits ? [...u.textureTraits] : [texture],
+    preferredTimes: u.preferredTimes ? [...u.preferredTimes] : [],
+    avoidedTimes: u.avoidedTimes ? [...u.avoidedTimes] : [],
+    lightSources: u.lightSources ? [...u.lightSources] : [],
+    cameraMoves: u.cameraMoves ? [...u.cameraMoves] : CAMERA_MOVES.slice(0, 6),
+    compositionRules: u.compositionRules ? [...u.compositionRules] : COMPOSITIONS.slice(0, 4),
+    livingElements: u.livingElements ? [...u.livingElements] : [...DEFAULT_LIVING_ELEMENTS],
+    backgroundLife: u.backgroundLife ? [...u.backgroundLife] : [...DEFAULT_BACKGROUND_LIFE],
+    crowdRules: u.crowdRules ? [...u.crowdRules] : [...DEFAULT_CROWD_RULES],
+    wardrobe: u.wardrobe ? [...u.wardrobe] : [],
+    wardrobeRules: u.wardrobeRules ? [...u.wardrobeRules] : [],
+    emotionalRegister: u.emotionalRegister ? [...u.emotionalRegister] : [...DEFAULT_EMOTIONAL_REGISTER],
+    transitionTriggers: u.transitionTriggers ? [...u.transitionTriggers] : [...DEFAULT_TRANSITION_TRIGGERS],
+    environmentPool: u.environmentPool ? [...u.environmentPool] : [],
+    continuityRules: u.continuityRules ? [...u.continuityRules] : [],
   }
 }
 
@@ -126,6 +157,9 @@ function toCharacter(seed: CharacterSeed): Character {
     language: 'francais',
     arc: seed.arc,
     relations: '',
+    isGroup: false,
+    gaze: '',
+    behaviors: [],
   }
   return { id: uid('chr'), ...base, anchor: characterAnchor(base) }
 }
@@ -227,6 +261,12 @@ function buildPilot(
       action: beat,
       endState: i === n - 1 ? format.payoff : '',
       styleNote: i === 0 ? direction.composition : '',
+      // Chaque plan recoit une vie de fond et un element en mouvement :
+      // sans eux, Seedance produit une photo animee.
+      backgroundAction: direction.backgroundLife.length ? rng.pick(direction.backgroundLife) : '',
+      livingDetail: direction.livingElements.length ? rng.pick(direction.livingElements) : '',
+      transitionOut:
+        i < n - 1 && direction.transitionTriggers.length ? rng.pick(direction.transitionTriggers) : '',
       audio: {
         music: i === 0 ? direction.soundSignature.split(';')[0].trim() : '',
         sfx: i === 0 && place ? place.soundscape.split(',')[0].trim() : '',
@@ -243,6 +283,9 @@ function buildPilot(
     title: `${format.name} — episode 1`,
     formatId: format.id,
     logline: `${format.pitch} ${rng.pick(HOOK_SHAPES)}`,
+    lyrics: '',
+    visualIdea: '',
+    continuity: direction.continuityRules[0] ?? '',
     duration,
     aspect,
     resolution: '1080p',

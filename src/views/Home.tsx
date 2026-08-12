@@ -5,6 +5,8 @@ import { getUniverse } from '../data/universes'
 import { formatDate } from '../lib/utils'
 import { ConfirmButton, Empty, Meter } from '../components/ui'
 import { PLATFORM_PRESETS } from '../data/library'
+import { ARTIST_PRESETS } from '../data/presets'
+import { addProject } from '../store'
 
 export default function Home({ onStudio, onCustom }: { onStudio: () => void; onCustom: () => void }) {
   const { projects } = useStore()
@@ -30,6 +32,45 @@ export default function Home({ onStudio, onCustom }: { onStudio: () => void; onC
           onClick={onCustom}
           alt
         />
+      </section>
+
+      <section>
+        <div className="mb-3">
+          <h2 className="font-display text-xl text-ink-100">Artistes</h2>
+          <p className="text-[12.5px] text-ink-400">
+            Socles de direction artistique fournis par l&apos;artiste. Rien n&apos;est tire au sort : le compte
+            s&apos;ouvre deja ecrit.
+          </p>
+        </div>
+        <div className="grid gap-3 md:grid-cols-2">
+          {ARTIST_PRESETS.map((preset) => (
+            <article key={preset.id} className="panel flex flex-col gap-3 p-5">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <h3 className="font-display text-xl leading-tight text-ink-100">
+                    {preset.emoji} {preset.name}
+                  </h3>
+                  <p className="mt-0.5 text-[13px] text-amber-soft">{preset.tagline}</p>
+                </div>
+              </div>
+              <p className="text-[12.5px] leading-relaxed text-ink-400">{preset.summary}</p>
+              <div className="flex flex-wrap gap-1.5">
+                {preset.highlights.map((h) => (
+                  <span key={h} className="chip">
+                    {h}
+                  </span>
+                ))}
+              </div>
+              <button
+                type="button"
+                className="btn-primary mt-1 w-fit"
+                onClick={() => addProject(preset.build())}
+              >
+                Ouvrir le compte {preset.name}
+              </button>
+            </article>
+          ))}
+        </div>
       </section>
 
       <section>
