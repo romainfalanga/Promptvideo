@@ -6,3 +6,6 @@ dist-ssr
 .vite
 npm-debug.log*
 yarn-error.log*
+
+# Etat local de la CLI Netlify
+.netlify
